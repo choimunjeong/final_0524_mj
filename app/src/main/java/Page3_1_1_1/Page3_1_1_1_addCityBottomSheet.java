@@ -106,7 +106,7 @@ public class Page3_1_1_1_addCityBottomSheet extends BottomSheetDialogFragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if(listener != null){
-                    listener.onsetlist(arrayData.get(position), arrayCityName.get(position));
+                    listener.onsetlist(arrayData.get(position), arrayCityName.get(position), arrayIndex.get(position));
                 }
                  dismiss();
             }
@@ -123,12 +123,13 @@ public class Page3_1_1_1_addCityBottomSheet extends BottomSheetDialogFragment {
 
         while(iCursor.moveToNext()){
             String tempIndex = iCursor.getString(iCursor.getColumnIndex("_id"));
+            String tempContentId = iCursor.getString(iCursor.getColumnIndex("userid"));
             String tempName = iCursor.getString(iCursor.getColumnIndex("name"));
             String tempCityname = iCursor.getString(iCursor.getColumnIndex("cityname"));
 
             String Result = "(" + tempCityname + ")" + tempName;
             arrayData.add(Result);
-            arrayIndex.add(tempIndex);
+            arrayIndex.add(tempContentId);
             arrayCityName.add(tempCityname);
         }
 
@@ -138,7 +139,7 @@ public class Page3_1_1_1_addCityBottomSheet extends BottomSheetDialogFragment {
 
     //인터페이스 구현-바텀시트 아이템 선택하면 리사이클러뷰에 넣어주기 위함
     public interface onSetList {
-        void onsetlist(String text, String cityname);
+        void onsetlist(String text, String cityname, String contentId);
     }
 
 }

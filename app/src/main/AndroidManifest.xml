@@ -15,7 +15,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme.NoActionBar">
+        android:theme="@style/Theme.Dark">
         <meta-data
             android:name="com.kakao.sdk.AppKey"
             android:value="d21ab179b00552d4207a548495837594" />
@@ -51,6 +51,8 @@
         <activity android:name="Page3_1_1_1.Page3_1_1_1_Main"/>
         <activity android:name="Page1_schedule.Page1_Main"/>
         <activity android:name="Page1_schedule.Page1_full_Schedule"/>
+        <activity android:name="Menu.Page4_2"/>
+        <activity android:name="DB.Train_page"/>
     </application>
 
 </manifest>

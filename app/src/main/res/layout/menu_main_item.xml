@@ -6,8 +6,10 @@
     android:background="#ffffff">
 
     <RelativeLayout
+        android:id="@+id/menu_layout"
         android:layout_width="match_parent"
         android:layout_height="36dp"
+        android:background="#F3F3F3"
         android:padding="5dp">
 
         //헤더 아이콘
@@ -36,7 +38,7 @@
             android:layout_height="9dp"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
-            android:background="@mipmap/ic_launcher"/>
+            android:background="@drawable/ic_up_btn"/>
 
     </RelativeLayout>
 

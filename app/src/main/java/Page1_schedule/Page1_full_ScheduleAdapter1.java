@@ -54,6 +54,7 @@ public class Page1_full_ScheduleAdapter1 extends  RecyclerView.Adapter<Page1_ful
             }
         }
 
+
         //리사이클러뷰 넣는 부분
         viewHolder.recyclerView.setLayoutManager( new LinearLayoutManager(context));
         adapter = new Page1_full_ScheduleAdapter2(Day_items);

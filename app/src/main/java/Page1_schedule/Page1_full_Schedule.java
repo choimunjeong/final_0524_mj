@@ -2,6 +2,8 @@ package Page1_schedule;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -10,8 +12,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.hansol.spot_200510_hs.R;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+
+import Page3_1_1_1.Page3_1_1_1_Main;
+
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 
 public class Page1_full_Schedule extends AppCompatActivity {
 
@@ -20,6 +29,7 @@ public class Page1_full_Schedule extends AppCompatActivity {
 
     //여행 일차를 알기 위함
     int dayNumber = 0 ;
+    String db_key;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -30,6 +40,7 @@ public class Page1_full_Schedule extends AppCompatActivity {
         Intent get = getIntent();
         All_items = (ArrayList<Page1_Main.RecycleItem>)get.getSerializableExtra("schedule_data");
         dayNumber = get.getIntExtra("dayNumber", dayNumber);
+        db_key = get.getStringExtra("key");
 
 
         String startDate = All_items.get(0).date;
@@ -49,5 +60,20 @@ public class Page1_full_Schedule extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter1 = new Page1_full_ScheduleAdapter1(All_items, dayNumber);
         recyclerView.setAdapter(adapter1);
+
+
+        //수정하기 버튼 누르면
+        FloatingActionButton editBtn = (FloatingActionButton)findViewById(R.id.page1_full_schedule_editBtn);
+        editBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Page1_full_Schedule.this, Page3_1_1_1_Main.class);
+                intent.putExtra("key", db_key);
+                Log.i("풀스케쥴에서 키값", db_key);
+                intent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
+                intent.addFlags(FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+            }
+        });
     }
 }

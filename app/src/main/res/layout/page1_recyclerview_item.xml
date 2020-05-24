@@ -8,9 +8,8 @@
     android:layout_marginLeft="24dp">
 
     <RelativeLayout
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:layout_marginRight="8dp">
 
         //'T' 모양 아이콘
@@ -31,9 +30,8 @@
 
     //역1-역2 텍스트
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="32dp"
-        android:layout_weight="5"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
@@ -51,9 +49,8 @@
 
     //기차검색창 부분
     <RelativeLayout
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="32dp"
-        android:layout_weight="5"
         android:layout_marginRight="8dp"
         android:gravity="center_vertical">
 

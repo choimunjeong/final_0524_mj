@@ -53,6 +53,8 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import DB.Train_DbOpenHelper;
+import Page1.Page1;
+import Page3.Page3_Main;
 
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
@@ -154,6 +156,7 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
         //page3_1_1_1_1 에서 일정저장하기 누를때 받아옴
         Intent get = getIntent();
         db_key = get.getStringExtra("key");
+        Log.i("키 받았다", db_key);
 
 
         // 현재 날짜 출력
@@ -220,7 +223,7 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
 
         //출발, 경유, 도착역
         for(int i =0; i < station.size(); i++){
-            String station_split[] = station.get(i).split("-");
+            String station_split[] = station.get(i).split(",");
             if(i < station.size() -1){
                 arrayLocal.add(station_split[0]);
             }
@@ -241,17 +244,20 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
                     && db_data.get(i).time.length() == 0
                     && db_data.get(i).contentId.length() == 0){
                 All_items.add(new RecycleItem(Page1_ScheduleAdapter.HEADER, db_data.get(i).date, db_data.get(i).text, "", "", "" ,""));
+                Log.i("스케쥴", db_data.get(i).date+"/"+db_data.get(i).text+"/"+ "" +"/"+ "" +"/"+ "" +"/"+"");
                 dayNumber++;
             }
 
             //기차시간
             else if(db_data.get(i).text_shadow.length() != 0){
-                All_items.add(new RecycleItem(Page1_ScheduleAdapter.CHILD,  db_data.get(i).date, "", db_data.get(i).time, db_data.get(i).text, "", ""));
+                All_items.add(new RecycleItem(Page1_ScheduleAdapter.CHILD,  db_data.get(i).date, db_data.get(i).text_shadow, db_data.get(i).time, db_data.get(i).text, "", ""));
+                Log.i("스케쥴", db_data.get(i).date+"/"+db_data.get(i).text_shadow+"/"+ db_data.get(i).time +"/"+db_data.get(i).text+"/"+ "" +"/"+"");
             }
 
             //관심 관광지
             else{
                 All_items.add(new RecycleItem(Page1_ScheduleAdapter.CITY,  db_data.get(i).date, "", "", "", db_data.get(i).text, db_data.get(i).contentId));
+                Log.i("스케쥴", db_data.get(i).date+"/"+""+"/"+ "" +"/"+ "" +"/"+ db_data.get(i).text +"/"+db_data.get(i).contentId);
             }
         }
 
@@ -295,10 +301,6 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
             public void onPageSelected(int position) {
                 // 데이터 요청
                 completeList.clear();
-                header_data.clear();
-                child1_data.clear();
-                child2_data.clear();
-                child3_data.clear();
                 if (position != arrayLocal.size() - 1){
                     Day_items.clear();
                     send_Api(stationWithTransfer.get(position));
@@ -329,6 +331,7 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
                 Intent intent = new Intent(Page1_Main.this, Page1_full_Schedule.class);
                 intent.putExtra("schedule_data", (Serializable)All_items);
                 intent.putExtra("dayNumber", finalDayNumber);
+                intent.putExtra("key", db_key);
                 intent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
                 intent.addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                 startActivity(intent);
@@ -375,7 +378,9 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
 
     //데이터베이스 받기(앞에서 저장한 값만 바로 보여줌)
     private void getDatabase(String db_key){
-        Cursor iCursor = mDbOpenHelper.selecteNumber(db_key);
+        String db_key2 = db_key.trim();
+        Cursor iCursor = mDbOpenHelper.selecteNumber(db_key2);
+        Log.d("dㅇㅇㅇㅇㅇ", "DB Size: " + iCursor.getCount());
         db_data.clear();
 
         while(iCursor.moveToNext()){
@@ -387,6 +392,7 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
             String tempTime = iCursor.getString(iCursor.getColumnIndex("time"));
             String tempContentId = iCursor.getString(iCursor.getColumnIndex("contentid"));
 
+            Log.i("로그다",tempDate+"/"+ tempDayPass+"/"+ tempStation+"/"+ tempTime+"/"+ tempContentId );
             db_data.add(new Database_Item(tempDate, tempDayPass, tempStation, tempTime, tempContentId));
         }
     }
@@ -459,149 +465,7 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
             completeList = header_data;
         }
 
-        //환승한다면
-        else {
-            switch (isMiddle) {
 
-                //1회 환승
-                case 1:
-                    Collections.sort(child1_data);
-
-                    //첫번째 기차의 시간표이 기준
-                    for (int i = 0; i < header_data.size(); i++) {
-                        String[] header_time_split = header_data.get(i).getArrTime().split(":");
-                        Log.i("뭔데", "사이즈:" + String.valueOf(header_data.size()) + "/도착시간:" + String.valueOf( header_data.get(i).getArrTime()+"/넘버"+String.valueOf(i) ));
-
-                        //도착시간이 자정을 넘기면 스케줄에 포함하지 않음
-                        if (Integer.parseInt(header_time_split[0].replaceAll("[^0-9]", "")) < 3)
-                            continue;
-
-                        //도착시간과 환승역의 출발시간을 비교해서 리스트에 넣어줌
-                        for (int p = 0; p < child1_data.size(); p++) {
-                            String[] child1_time_split = child1_data.get(p).getDepTime().split(":");
-                            if (Integer.parseInt(header_time_split[0]) <= Integer.parseInt(child1_time_split[0])
-                                    && Integer.parseInt(header_time_split[1].substring(0,2)) + 10 < Integer.parseInt(child1_time_split[1])) {
-                                 completeList.add(new Api_Item(
-                                        Page1_ListAdapter.CHILD,
-                                        header_data.get(i).getDepTime() + "\n" + child1_data.get(p).getDepTime(),
-                                        header_data.get(i).getArrTime() + "\n" + child1_data.get(p).getArrTime(),
-                                        header_data.get(i).getTrainNumber() + "\n" + child1_data.get(p).getTrainNumber()
-                                ));
-                                break;
-                            }
-                        }
-                    }
-                    break;
-
-
-                //2회 환승
-                case 2:
-                    Collections.sort(child1_data);
-                    Collections.sort(child2_data);
-
-                    //첫번째 기차의 시간표이 기준
-                    for (int i = 0; i < header_data.size(); i++) {
-                        String[] header_time_split = header_data.get(i).getArrTime().split(":");
-
-                        //도착시간이 자정을 넘기면 스케줄에 포함하지 않음
-                        if (Integer.parseInt(header_time_split[0].replaceAll("[^0-9]", "")) < 3)
-                            continue;
-
-                        //환승(1)
-                        for (int p = 0; p < child1_data.size(); p++) {
-                            String[] child1_Deptime_split = child1_data.get(p).getDepTime().split(":");
-                            String[] child1_Arrtime_split = child1_data.get(p).getArrTime().split(":");
-
-                            //도착시간이 자정을 넘기면 스케줄에 포함하지 않음
-                            if (Integer.parseInt(child1_Arrtime_split[0].replaceAll("[^0-9]", "")) < 3)
-                                continue;
-                            ;
-
-                            //환승(2)
-                            //도착시간과 환승역의 출발시간을 비교해서 리스트에 넣어줌
-                            for (int t = 0; t < child2_data.size(); t++) {
-                                String[] child2_time_split = child2_data.get(t).getDepTime().split(":");
-
-                                if (Integer.parseInt(header_time_split[0]) <= Integer.parseInt(child1_Deptime_split[0])
-                                        && Integer.parseInt(header_time_split[1].substring(0,2)) + 10 < Integer.parseInt(child1_Deptime_split[1].substring(0,2))
-                                        && Integer.parseInt(child1_Arrtime_split[0]) <= Integer.parseInt(child2_time_split[0])
-                                        && Integer.parseInt(child1_Arrtime_split[1].substring(0,2)) + 10 < Integer.parseInt(child2_time_split[1].substring(0,2))) {
-
-                                    completeList.add(new Api_Item(
-                                            Page1_ListAdapter.CHILD,
-                                            header_data.get(i).getDepTime() + "\n" + child1_data.get(p).getDepTime() + "\n" + child2_data.get(t).getDepTime(),
-                                            header_data.get(i).getArrTime() + "\n" + child1_data.get(p).getArrTime() + "\n" + child2_data.get(t).getArrTime(),
-                                            header_data.get(i).getTrainNumber() + "\n" + child1_data.get(p).getTrainNumber() + "\n" + child2_data.get(t).getTrainNumber()
-                                    ));
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    break;
-
-
-                //3회 환승
-                case 3:
-                    Collections.sort(child1_data);
-                    Collections.sort(child2_data);
-                    Collections.sort(child3_data);
-
-                    //첫번째 기차의 시간표이 기준
-                    for (int i = 0; i < header_data.size(); i++) {
-                        String[] header_time_split = header_data.get(i).getArrTime().split(":");
-
-                        //도착시간이 자정을 넘기면 스케줄에 포함하지 않음
-                        if (Integer.parseInt(header_time_split[0].replaceAll("[^0-9]", "")) < 3)
-                            continue;
-
-                        //환승(1)
-                        for (int p = 0; p < child1_data.size(); p++) {
-                            String[] child1_Deptime_split = child1_data.get(p).getDepTime().split(":");
-                            String[] child1_Arrtime_split = child1_data.get(p).getArrTime().split(":");
-
-                            //도착시간이 자정을 넘기면 스케줄에 포함하지 않음
-                            if (Integer.parseInt(child1_Arrtime_split[0].replaceAll("[^0-9]", "")) < 3)
-                                continue;
-
-                            //환승(2)
-                            for (int t = 0; t < child2_data.size(); t++) {
-                                String[] child2_Deptime_split = child2_data.get(t).getDepTime().split(":");
-                                String[] child2_Arrtime_split = child2_data.get(t).getArrTime().split(":");
-
-                                //도착시간이 자정을 넘기면 스케줄에 포함하지 않음
-                                if (Integer.parseInt(child2_Arrtime_split[0].replaceAll("[^0-9]", "")) < 3)
-                                    continue;
-
-                                //환승(3)
-                                //도착시간과 환승역의 출발시간을 비교해서 리스트에 넣어줌
-                                for (int g = 0; g < child3_data.size(); g++) {
-                                    String[] child3_time_split = child3_data.get(g).getDepTime().split(":");
-
-                                    if (Integer.parseInt(header_time_split[0]) <= Integer.parseInt(child1_Deptime_split[0])
-                                            && Integer.parseInt(header_time_split[1].substring(0,2)) + 10 < Integer.parseInt(child1_Deptime_split[1].substring(0,2))
-                                            && Integer.parseInt(child1_Arrtime_split[0]) <= Integer.parseInt(child2_Deptime_split[0])
-                                            && Integer.parseInt(child1_Arrtime_split[1].substring(0,2)) + 10 < Integer.parseInt(child2_Deptime_split[1].substring(0,2))
-                                            && Integer.parseInt(child2_Arrtime_split[0]) <= Integer.parseInt(child3_time_split[0])
-                                            && Integer.parseInt(child2_Arrtime_split[1].substring(0,2)) + 10 < Integer.parseInt(child3_time_split[1].substring(0,2))) {
-
-                                        completeList.add(new Api_Item(
-                                                Page1_ListAdapter.CHILD,
-                                                header_data.get(i).getDepTime() + "\n" + child1_data.get(p).getDepTime() + "\n" + child2_data.get(t).getDepTime() + "\n" + child3_data.get(g).getDepTime(),
-                                                header_data.get(i).getArrTime() + "\n" + child1_data.get(p).getArrTime() + "\n" + child2_data.get(t).getArrTime() + "\n" + child3_data.get(g).getArrTime(),
-                                                header_data.get(i).getTrainNumber() + "\n" + child1_data.get(p).getTrainNumber() + "\n" + child2_data.get(t).getTrainNumber() + "\n" + child3_data.get(g).getTrainNumber()
-                                        ));
-                                        break;
-                                    }
-                                }
-
-
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
         itemAdapter = new Page1_ListAdapter(this, completeList);
         dataList.setAdapter(itemAdapter);
         itemAdapter.notifyDataSetChanged();
@@ -695,11 +559,9 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
                 switch (isMiddle) {
                     case 0:
                         header_data.add(new Api_Item(Page1_ListAdapter.HEADER, depTime.substring(0,2)+":"+depTime.substring(2), arrTime.substring(0,2)+":"+arrTime.substring(2),  traingradename));
-                        Log.i("여기서부터..?11", arrTime);
                         break;
                     case 1:
                         child1_data.add(new Api_Item(Page1_ListAdapter.CHILD, depTime.substring(0,2)+":"+depTime.substring(2), arrTime.substring(0,2)+":"+arrTime.substring(2),  traingradename));
-                        Log.i("여기서부터..?22", arrTime);
                         break;
                     case 2:
                         child2_data.add(new Api_Item(Page1_ListAdapter.CHILD, depTime.substring(0,2)+":"+depTime.substring(2), arrTime.substring(0,2)+":"+arrTime.substring(2),  traingradename));
@@ -821,6 +683,34 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
         String contentName;
         String contentId;
 
+        public int getType() {
+            return type;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public String getDaypass() {
+            return daypass;
+        }
+
+        public String getTrain_time() {
+            return train_time;
+        }
+
+        public String getStation() {
+            return station;
+        }
+
+        public String getContentName() {
+            return contentName;
+        }
+
+        public String getContentId() {
+            return contentId;
+        }
+
         public RecycleItem(int type, String date, String daypass, String train_time, String station, String contentName, String contentId) {
             this.type = type;
             this.date = date;
@@ -870,5 +760,13 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(Page1_Main.this, Page3_Main.class);
+        intent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+    }
 }
 

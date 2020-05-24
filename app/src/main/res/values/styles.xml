@@ -11,13 +11,14 @@
     <style name="Theme.Dark" parent="AppTheme.NoActionBar">
         <item name="android:statusBarColor" tools:targetApi="21">@color/colorPrimaryDark</item> <!--Status Bar의 배경색-->
         <item name="android:windowLightStatusBar" tools:targetApi="23">false</item> <!--Status Bar 아이콘의 색상 true:검은 아이콘, false:흰 아이콘-->
-
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
         <item name="toolbarStyle">@style/ToolbarStyle.Dark</item> <!--Toolbar 스타일-->
     </style>
 
 
     <style name="ToolbarStyle.Dark" parent="Widget.AppCompat.Toolbar">
-        <item name="android:background">#FFFFFF</item> <!-- Toolbar의 배경색-->
+        <item name="android:background">#00FFFFFF</item> <!-- Toolbar의 배경색-->
     </style>
 
 

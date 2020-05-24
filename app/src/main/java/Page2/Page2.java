@@ -204,7 +204,7 @@ public class Page2 extends AppCompatActivity implements Page2_OnItemClick {
         url_code();
 
         //관광 api 연결
-      settingAPI_Data();
+       settingAPI_Data();
 
         //리사이클러뷰 연결
         adapter = new Page2_CardView_adapter(cardview_items, mainActivity, "cityname", this);

@@ -291,6 +291,10 @@ public class Page3_1_1_Main extends AppCompatActivity implements Page3_1_1_addBo
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(R.anim.backbutton, R.anim.backbutton);
+        list.clear();
+        add_list.clear();
+        result_name.clear();
+        result_number.clear();
     }
 
 

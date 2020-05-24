@@ -4,12 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="Page1.Page1">
+    tools:context="Page1.Page1"
+    android:background="#00FFFFFF">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#00FFFFFF"
         android:elevation="0dp">
 
 
@@ -19,6 +21,7 @@
             android:layout_height="48dp"
             app:layout_scrollFlags="scroll|enterAlways"
             app:toolbarId="@+id/toolbar"
+            android:background="#00FFFFFF"
             android:elevation="0dp">
 
                 <androidx.appcompat.widget.Toolbar
@@ -28,7 +31,7 @@
                     android:paddingTop="10dp"
                     app:layout_collapseMode="pin"
                     android:elevation="0dp"
-                    android:theme="@style/Theme.Dark">
+                    android:background="#00FFFFFF">
 
                     <ImageButton
                         android:id="@+id/main_logo"

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 
 import DB.DbOpenHelper;
@@ -26,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -109,7 +111,7 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 
         //****************여기 추가**************************************************************************
         // (1) 아래 자바 파일 추가
@@ -147,7 +149,13 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
             }
         };
 
+      //  supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+       // getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         setSupportActionBar(toolbar2);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#000000ff")));
+        actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#000000ff")));
+
         drawer.addDrawerListener(mDrawerToggle);
 
         //메뉴 안 내용 구성

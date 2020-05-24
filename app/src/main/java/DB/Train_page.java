@@ -58,13 +58,13 @@ public class Train_page extends AppCompatActivity {
     private AdapterView.OnItemClickListener onClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Toast.makeText(getApplicationContext(), "눌렸네", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "눌렸네"+arrayAdapter.getItem(position), Toast.LENGTH_SHORT).show();
         }
     };
 
     private AdapterView.OnItemLongClickListener longClickListener = new AdapterView.OnItemLongClickListener() {
         @Override
-        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
             Log.d("Long Click", "position = " + position);
             nowIndex = Long.parseLong(arrayIndex.get(position));
             AlertDialog.Builder dialog = new AlertDialog.Builder(Train_page.this);
@@ -74,7 +74,7 @@ public class Train_page extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             Toast.makeText(Train_page.this, "데이터를 삭제했습니다.", Toast.LENGTH_SHORT).show();
-                            mDbOpenHelper.deleteColumnByNumber(number);
+                            mDbOpenHelper.deleteColumnByKey(arrayIndex.get(position));
                             showDatabase(sort);
                         }
                     })
@@ -107,7 +107,8 @@ public class Train_page extends AppCompatActivity {
                 String tempTime = iCursor.getString(iCursor.getColumnIndex("time"));
                 String tempContentId = iCursor.getString(iCursor.getColumnIndex("contentid"));
 
-                String Result = tempDate + "/"
+                String Result = tempNumber + "/"
+                        + tempDate + "/"
                         + tempDayPass + "/"
                         + tempStation + "/"
                         + tempTime + "/"
@@ -115,7 +116,7 @@ public class Train_page extends AppCompatActivity {
 
                 number = tempNumber;
                 arrayData.add(Result);
-                arrayIndex.add(tempIndex);
+                arrayIndex.add(tempNumber);
             }
 
         arrayAdapter.clear();

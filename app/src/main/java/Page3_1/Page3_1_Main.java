@@ -262,6 +262,7 @@ public class Page3_1_Main extends AppCompatActivity {
         //리스트에 저장
         for (int i = 0; i < result_name.size(); i++) {
             next_data.add(result_number.get(i)+ "," + result_name.get(i));
+            Log.i("야 너 할 수 있어,", result_number.get(i)+ "," + result_name.get(i));
         }
     }
 

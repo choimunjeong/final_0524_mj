@@ -65,6 +65,11 @@ public class Page3_1_1_1_bottomSheet_Adapter extends BaseAdapter {
         viewHolder.startCityNAme.setText(list.get(position).spendTime);
         viewHolder.trainNumber.setText(list.get(position).trainNumber);
 
+
+
+
+
+
         return convertView;
     }
 
@@ -73,6 +78,7 @@ public class Page3_1_1_1_bottomSheet_Adapter extends BaseAdapter {
         TextView arrTime ;
         TextView startCityNAme ;
         TextView trainNumber ;
+        TextView error_msg;
     }
 
 

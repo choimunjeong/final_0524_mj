@@ -112,11 +112,11 @@
             <ImageView
                 android:id="@+id/down_btn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="5dp"
                 android:layout_below="@+id/line4"
                 android:layout_marginTop="3dp"
                 android:layout_centerHorizontal="true"
-                android:background="@drawable/ic_benefit_down"/>
+                android:background="@drawable/ic_up_btn"/>
 
             <TextView
                 android:id="@+id/benefit_content"

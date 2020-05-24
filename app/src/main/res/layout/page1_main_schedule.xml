@@ -217,6 +217,18 @@
                 android:dividerHeight="1px"
                 android:divider="#9C9C9C" />
 
+            //열차 시간표가 없을 때
+            <TextView
+                android:id="@+id/page1_timeTable_noData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/table_line"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="10dp"
+                android:visibility="invisible"
+                android:text="@string/train_err_internet"/>
+
+
         </RelativeLayout>
 
 

@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:usesCleartextTraffic="true"
@@ -49,10 +50,18 @@
         <activity android:name="Page3_1.Page3_1_Main"/>
         <activity android:name="Page3_1_1.Page3_1_1_Main"/>
         <activity android:name="Page3_1_1_1.Page3_1_1_1_Main"/>
-        <activity android:name="Page1_schedule.Page1_Main"/>
+        <activity android:name="Page1_schedule.Page1_Main"
+            android:launchMode="singleTop"/>
         <activity android:name="Page1_schedule.Page1_full_Schedule"/>
         <activity android:name="Menu.Page4_2"/>
         <activity android:name="DB.Train_page"/>
+
+        <service
+            android:name="Page1_schedule.LocationUpdatesService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="location" />
+
     </application>
 
 </manifest>

@@ -55,14 +55,12 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
     public static final int CITY =2;
 
     //바텀시트 관련(맨 아래 함수)
+    int isNetworkConnect;
+    boolean isApiError = false;
     FragmentManager fragmentManager;
-    String receiveMsg;
+    String receiveMsg = "";
     String [] data_split;
     ArrayList<Page3_1_1_1_bottomSheet_Adapter.Api_Item> completeList;              //정제된 리스트값
-    ArrayList<Page3_1_1_1_bottomSheet_Adapter.Api_Item> header_data;               //정제전 헤더값
-    ArrayList<Page3_1_1_1_bottomSheet_Adapter.Api_Item> child1_data;               //정제전 차일드 값(경유1
-    ArrayList<Page3_1_1_1_bottomSheet_Adapter.Api_Item> child2_data;               //정제전 차일드 값(경유2
-    ArrayList<Page3_1_1_1_bottomSheet_Adapter.Api_Item> child3_data;               //정제전 차일드 값(경유3
     String[] arr_line;
     String[] arr_all;
     String[] _name = new String[238];                                              //txt에서 받은 역이름
@@ -73,9 +71,10 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
 
 
     //부모 액티비티와 연결
-    Page3_1_1_1_trainAdapter(ArrayList<Page3_1_1_1_Main.RecycleItem> list, FragmentManager supportFragmentManager) {
+    Page3_1_1_1_trainAdapter(ArrayList<Page3_1_1_1_Main.RecycleItem> list, FragmentManager supportFragmentManager, int isNetworkConnect) {
         items = list;
         this.fragmentManager = supportFragmentManager;
+        this.isNetworkConnect = isNetworkConnect;
     }
 
 
@@ -248,7 +247,9 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
             item_touch = (LinearLayout) itemView.findViewById(R.id.item_touch);
 
 
-            //기차 시간표 부분
+            //기차 시간표 부분------------------------------------------------여기 아래 수정함
+            //page3_1_1_1_bottomSheet_Adapter 자바 파일도 수정함
+            //page3_1_1_1_apisheet.xml 에 textview 추가 하시길
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -271,12 +272,33 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
 
                     //바텀시트 구성
                     ListView listView = view.findViewById(R.id.api_list);
+                    TextView error_msg = view.findViewById(R.id.page3_1_1_1_error);
                     completeList= new ArrayList<Page3_1_1_1_bottomSheet_Adapter.Api_Item>();
 
                     //리스트 초기화
                     completeList.clear();
                     settingList(context);
-                    send(data, date);
+
+                    //인터넷 연결이 되어있을 때만 api 돌린 ( 아니면 오류남)-
+                    if( isNetworkConnect != 3){
+                        send(data, date);
+                    }
+
+                    //기차시간표 오류 메시지
+                    //(1)인터넷 연결 안되어있을 때 / (2)API 연결 오류 / (3)연결되는 노선이 없음
+                    if(completeList.size() < 1){
+                        if(isNetworkConnect == 3){
+                            error_msg.setText(R.string.train_err_internet);
+                        }
+                        else if(isApiError ){
+                            error_msg.setText(R.string.train_err_api);
+                        }
+                        else {
+                            error_msg.setText(R.string.train_err_course);
+                        }
+                        error_msg.setVisibility(View.VISIBLE);
+                    } else
+                        error_msg.setVisibility(View.INVISIBLE);
 
 
                     //api 트래픽 다 써서 임의값 넣어놓음
@@ -495,8 +517,12 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
 
         //출발 시간 정렬
         Collections.sort(completeList);
-    }
 
+        //api 오류가 나면 true
+       if(receiveMsg.contains("LIMITED") || receiveMsg.contains("SERVICE"))  {
+           isApiError = true;
+       }
+    }
 
 
 

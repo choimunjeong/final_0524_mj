@@ -32,6 +32,7 @@ import DB.Train_DbOpenHelper;
 import Menu.Page4_2;
 import Page1_schedule.Page1_Main;
 import Page1_schedule.Page1_ScheduleAdapter;
+import Page2_1_1.NetworkStatus;
 
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
@@ -225,7 +226,8 @@ public  class Page3_1_1_1_Main extends AppCompatActivity implements Page3_1_1_1_
 
 
         // 리사이클러뷰에 Adapter 객체 지정.
-        adapter = new Page3_1_1_1_trainAdapter(list, getSupportFragmentManager());
+        int isNetworkConnect  = NetworkStatus.getConnectivityStatus(Page3_1_1_1_Main.this);
+        adapter = new Page3_1_1_1_trainAdapter(list, getSupportFragmentManager(), isNetworkConnect);
         recyclerView.setAdapter(adapter);
 
 

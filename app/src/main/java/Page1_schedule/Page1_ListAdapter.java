@@ -2,6 +2,7 @@ package Page1_schedule;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,10 +50,10 @@ public class Page1_ListAdapter extends BaseAdapter {
     public View getView(int position, View view, ViewGroup parent) {
         View convertView = view;
         if(convertView == null) convertView = layoutInflater.inflate(R.layout.page1_timetable_item,null);
-        TextView arr_time_tv = (TextView)convertView.findViewById(R.id.page1_arrTime);
-        TextView dep_time_tv = (TextView)convertView.findViewById(R.id.page1_depTime);
-        TextView transfer_tv = (TextView)convertView.findViewById(R.id.page1_transfer);
-        LinearLayout item_back = (LinearLayout)convertView.findViewById(R.id.item_back);
+        TextView arr_time_tv = convertView.findViewById(R.id.page1_arrTime);
+        TextView dep_time_tv = convertView.findViewById(R.id.page1_depTime);
+        TextView transfer_tv = convertView.findViewById(R.id.page1_transfer);
+
         arr_time_tv.setText(data.get(position).arrTime);
         dep_time_tv.setText(data.get(position).depTime);
         transfer_tv.setText(data.get(position).trainNumber);
@@ -68,6 +69,7 @@ public class Page1_ListAdapter extends BaseAdapter {
             dep_time_tv.setTextColor(Color.BLACK);
             transfer_tv.setTextColor(Color.BLACK);
         }
+
 
         return convertView;
     }

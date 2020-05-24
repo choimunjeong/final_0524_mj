@@ -128,7 +128,6 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
                 public boolean onTouch(View view, MotionEvent motionEvent) {
                     if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN) {
                         touchHelper.startDrag(holder);
-                        Log.i("몇 번째냐면", String.valueOf(position));
                     }
                     return false;
                 }
@@ -168,6 +167,13 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
             itemViewHolder.mCourseText1.setText(text_split[0]);
             itemViewHolder.mCourseText2.setText(text_split[1]);
             itemViewHolder.mShadowText.setText(item.text_shadow);
+            itemViewHolder.mTimeText.setText(item.train_time);
+            if(item.train_time.length() > 0){
+                itemViewHolder.mTimeText.setTextColor(Color.parseColor("#000000"));
+                itemViewHolder.mTimeText.setTextSize(16f);
+                itemViewHolder.search_img.setVisibility(View.INVISIBLE);
+            } else
+                itemViewHolder.search_img.setVisibility(View.VISIBLE);
         }
 
 
@@ -249,6 +255,7 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
                     //현재 위치를 받아오기 위함
                     final Context context = v.getContext();
                     final int pos = getAdapterPosition() ;
+                    final Page3_1_1_1_Main.RecycleItem item = items.get(pos);
 
                     //바텀시트에 전달할 값
                     ArrayList<String> data = new ArrayList<>();
@@ -290,17 +297,14 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
                             int action = event.getAction();
                             switch (action) {
                                 case MotionEvent.ACTION_DOWN:
-                                    // Disallow NestedScrollView to intercept touch events.
                                     v.getParent().requestDisallowInterceptTouchEvent(true);
                                     break;
 
                                 case MotionEvent.ACTION_UP:
-                                    // Allow NestedScrollView to intercept touch events.
                                     v.getParent().requestDisallowInterceptTouchEvent(false);
                                     break;
                             }
 
-                            // Handle ListView touch events.
                             v.onTouchEvent(event);
                             return true;
                         }
@@ -315,6 +319,7 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
                             mTimeText.setText(startTIme[0]+" - "+endTime[endTime.length-1]);
                             mTimeText.setTextColor(Color.parseColor("#000000"));
                             mTimeText.setTextSize(16f);
+                            items.set(pos, new Page3_1_1_1_Main.RecycleItem(Page3_1_1_1_trainAdapter.CHILD,  item.text_shadow, item.text, item.date,startTIme[0]+" - "+endTime[endTime.length-1] , ""));
                             search_img.setVisibility(View.INVISIBLE);
                             dialog.dismiss();
                         }
@@ -457,16 +462,10 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
                 String depTime = depplandtime.substring(8, 12);
                 String arrTime = arrplandtime.substring(8, 12);
 
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HHmm", Locale.KOREA);
-                Date dep = simpleDateFormat.parse(depTime);
-                Date arr = simpleDateFormat.parse(arrTime);
-
                 completeList.add(new Page3_1_1_1_bottomSheet_Adapter.Api_Item(Page3_1_1_1_bottomSheet_Adapter.HEADER, depTime.substring(0,2)+":"+depTime.substring(2), arrTime.substring(0,2)+":"+arrTime.substring(2), "["+depplacename+"]", traingradename));
             }
 
         } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
             e.printStackTrace();
         }
         return  arraysum;

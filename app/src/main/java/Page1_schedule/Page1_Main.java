@@ -156,7 +156,6 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
         //page3_1_1_1_1 에서 일정저장하기 누를때 받아옴
         Intent get = getIntent();
         db_key = get.getStringExtra("key");
-        Log.i("키 받았다", db_key);
 
 
         // 현재 날짜 출력
@@ -188,7 +187,6 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
 
         //데이터베이스에 있는 값을 리스트에 추가
         getDatabase(db_key);
-
 
 
         //출발 날짜(디데이 계산)
@@ -244,20 +242,17 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
                     && db_data.get(i).time.length() == 0
                     && db_data.get(i).contentId.length() == 0){
                 All_items.add(new RecycleItem(Page1_ScheduleAdapter.HEADER, db_data.get(i).date, db_data.get(i).text, "", "", "" ,""));
-                Log.i("스케쥴", db_data.get(i).date+"/"+db_data.get(i).text+"/"+ "" +"/"+ "" +"/"+ "" +"/"+"");
                 dayNumber++;
             }
 
             //기차시간
             else if(db_data.get(i).text_shadow.length() != 0){
                 All_items.add(new RecycleItem(Page1_ScheduleAdapter.CHILD,  db_data.get(i).date, db_data.get(i).text_shadow, db_data.get(i).time, db_data.get(i).text, "", ""));
-                Log.i("스케쥴", db_data.get(i).date+"/"+db_data.get(i).text_shadow+"/"+ db_data.get(i).time +"/"+db_data.get(i).text+"/"+ "" +"/"+"");
-            }
+               }
 
             //관심 관광지
             else{
                 All_items.add(new RecycleItem(Page1_ScheduleAdapter.CITY,  db_data.get(i).date, "", "", "", db_data.get(i).text, db_data.get(i).contentId));
-                Log.i("스케쥴", db_data.get(i).date+"/"+""+"/"+ "" +"/"+ "" +"/"+ db_data.get(i).text +"/"+db_data.get(i).contentId);
             }
         }
 
@@ -323,6 +318,7 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
 
 
 
+        //******05/24 추가**************************************************//
         //전체 스케줄 버튼 누르면
         final int finalDayNumber = dayNumber;
         all_schedule_btn.setOnClickListener(new View.OnClickListener() {
@@ -339,12 +335,20 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
         });
 
 
+        //스케쥴 어댑터 연결
         inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.paeg1_recyclerview, schedule_layout, true);
         RecyclerView schedule_recyclerview = (RecyclerView) findViewById(R.id.page1_scheedule_recyclerview);
+        ImageView no_sche = (ImageView)findViewById(R.id.no_sche);
         schedule_recyclerview.setLayoutManager(new LinearLayoutManager(this));
         adapter = new Page1_ScheduleAdapter(Day_items);
         schedule_recyclerview.setAdapter(adapter);
+
+        //스케쥴이 없을 때
+        if(Day_items.size() < 2){
+            no_sche.setVisibility(View.VISIBLE);
+        } else
+            no_sche.setVisibility(View.INVISIBLE);
     }
 
 
@@ -464,7 +468,6 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
         if (isMiddle == 0) {
             completeList = header_data;
         }
-
 
         itemAdapter = new Page1_ListAdapter(this, completeList);
         dataList.setAdapter(itemAdapter);

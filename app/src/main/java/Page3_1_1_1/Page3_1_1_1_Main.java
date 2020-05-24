@@ -68,6 +68,20 @@ public  class Page3_1_1_1_Main extends AppCompatActivity implements Page3_1_1_1_
         super.onCreate(savedInstanceState);
         setContentView(R.layout.page3_1_1_1_main);
 
+        //*********전체스케쥴 관련***********************************************************//
+        //xml 추가+수정
+        //page1_recyclerview.xml : no_sche 이미지 추가
+        //page1_full_schedule_item1 : no_sche 이미지 추가
+        //page1_recyclerview_item : 수정
+
+        //자바
+        //page3_1_1_1_Main 추가
+        //Page3_1_1_1_trainAdapter 수정
+        //Page1_Main 수정
+        //Page1_full_Schedule 수정
+        //Page1_full_ScheduleAdapter1 수정
+        //Page1_full_SCheduleAdapter2 수정
+
 
         //데이터베이스 연결
         dbOpenHelper = new Train_DbOpenHelper(this);
@@ -266,10 +280,12 @@ public  class Page3_1_1_1_Main extends AppCompatActivity implements Page3_1_1_1_
                     startActivity(intent);
                 }
 
+                //page1_full_schedule 에서 왔으면
                 else{
                     dbOpenHelper.open();
+                    dbOpenHelper.deleteColumnByKey(db_key);
                     for(int i=0; i < list.size(); i++){
-                        dbOpenHelper.updateColumn(
+                        dbOpenHelper.insertColumn(
                                 "no",
                                 db_key,
                                 list.get(i).date,
@@ -309,7 +325,7 @@ public  class Page3_1_1_1_Main extends AppCompatActivity implements Page3_1_1_1_
 
                 if(station.contains(cityname)){
                     list.add(i+1, new RecycleItem(Page3_1_1_1_trainAdapter.CITY, "",  text,  list.get(i).date, "",  contentId));
-                    adapter.notifyDataSetChanged();
+                    adapter.notifyItemRangeChanged(i+1, list.size());
                     isAdd = true;
                     break;
                 }
@@ -323,7 +339,7 @@ public  class Page3_1_1_1_Main extends AppCompatActivity implements Page3_1_1_1_
 
 
 
-    public class RecycleItem {
+    public static class RecycleItem {
         int type;
         String text;
         String text_shadow;
@@ -362,6 +378,8 @@ public  class Page3_1_1_1_Main extends AppCompatActivity implements Page3_1_1_1_
         getitem.clear();
     }
 
+
+    //*********추가 05/24*************************************************************//
     //데이터베이스 받기(앞에서 저장한 값만 바로 보여줌)
     private void getDatabase(String db_key){
         String db_key2 = db_key.trim();
@@ -374,8 +392,6 @@ public  class Page3_1_1_1_Main extends AppCompatActivity implements Page3_1_1_1_
         List<String> contendId = new ArrayList<>();
 
         while(iCursor.moveToNext()) {
-            String tempIndex    = iCursor.getString(iCursor.getColumnIndex("_id"));
-            String tempNumber   = iCursor.getString(iCursor.getColumnIndex("number"));
             String tempDate     = iCursor.getString(iCursor.getColumnIndex("date"));
             String tempDayPass  = iCursor.getString(iCursor.getColumnIndex("daypass"));
             String tempStation  = iCursor.getString(iCursor.getColumnIndex("station"));
@@ -397,7 +413,7 @@ public  class Page3_1_1_1_Main extends AppCompatActivity implements Page3_1_1_1_
 
                 //기차시간
                 else if (contendId.get(i).equals("")) {
-                    list.add(new RecycleItem(Page3_1_1_1_trainAdapter.CHILD, station.get(i), daypase.get(i), date.get(i), "", ""));
+                    list.add(new RecycleItem(Page3_1_1_1_trainAdapter.CHILD, station.get(i), daypase.get(i), date.get(i), time.get(i), ""));
                 }
 
                 //시티

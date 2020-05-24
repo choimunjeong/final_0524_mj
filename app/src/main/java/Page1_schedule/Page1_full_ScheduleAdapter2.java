@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,7 +43,7 @@ public class Page1_full_ScheduleAdapter2 extends RecyclerView.Adapter<RecyclerVi
 
             case CHILD:
                 LayoutInflater inflater2 = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View view2 = inflater2.inflate(R.layout.page1_recyclerview_item,parent,false);
+                View view2 = inflater2.inflate(R.layout.page1_recyclerview_item, parent,false);
                 Page1_full_ScheduleAdapter2.ItemViewHolder itemViewHolder = new Page1_full_ScheduleAdapter2.ItemViewHolder(view2);
                 return itemViewHolder;
 
@@ -51,6 +52,7 @@ public class Page1_full_ScheduleAdapter2 extends RecyclerView.Adapter<RecyclerVi
                 View view3 = inflater3.inflate(R.layout.page1_recyclerview_cityitem, parent, false);
                 Page1_full_ScheduleAdapter2.CityViewHolder cityViewHolder = new Page1_full_ScheduleAdapter2.CityViewHolder(view3);
                 return cityViewHolder;
+
         }
         return null;
     }
@@ -63,22 +65,26 @@ public class Page1_full_ScheduleAdapter2 extends RecyclerView.Adapter<RecyclerVi
         int itemViewType = getItemViewType(position);
 
 
+
         if (itemViewType == HEADER) {
             final HeaderViewHolder headerViewHolder = (HeaderViewHolder) holder;
             headerViewHolder.header_title.setText(item.daypass);
         }
 
+        //*******수정 05/24*********************************************************//
         else if (itemViewType == CHILD) {
             final ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
             String station_split[] = item.station.split(",");
-            itemViewHolder.mCourseText.setText(station_split[0] + " - " + station_split[1]);
-            itemViewHolder.mTimeText.setText(item.train_time);
+            itemViewHolder.mTimeText.setText(station_split[0] + " - " + station_split[1]);
+            itemViewHolder.mCourseText.setText(item.train_time);
         }
 
         else {
             CityViewHolder cityViewHolder = (CityViewHolder) holder;
             cityViewHolder.city_text.setText(item.contentName);
         }
+
+
     }
 
 
@@ -99,6 +105,7 @@ public class Page1_full_ScheduleAdapter2 extends RecyclerView.Adapter<RecyclerVi
         public HeaderViewHolder(View itemView) {
             super(itemView);
             header_title =  itemView.findViewById(R.id.page1_scheedule_header);
+
         }
     }
 

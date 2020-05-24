@@ -62,6 +62,7 @@ public class Page1_full_Schedule extends AppCompatActivity {
         recyclerView.setAdapter(adapter1);
 
 
+        //*******추가 05/24*********************************************************//
         //수정하기 버튼 누르면
         FloatingActionButton editBtn = (FloatingActionButton)findViewById(R.id.page1_full_schedule_editBtn);
         editBtn.setOnClickListener(new View.OnClickListener() {
@@ -69,7 +70,6 @@ public class Page1_full_Schedule extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(Page1_full_Schedule.this, Page3_1_1_1_Main.class);
                 intent.putExtra("key", db_key);
-                Log.i("풀스케쥴에서 키값", db_key);
                 intent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
                 intent.addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                 startActivity(intent);

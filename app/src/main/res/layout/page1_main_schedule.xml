@@ -225,8 +225,7 @@
                 android:layout_below="@id/table_line"
                 android:layout_marginTop="10dp"
                 android:layout_marginLeft="10dp"
-                android:visibility="invisible"
-                android:text="@string/train_err_internet"/>
+                android:text=""/>
 
 
         </RelativeLayout>

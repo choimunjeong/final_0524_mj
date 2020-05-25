@@ -26,16 +26,16 @@ import com.example.hansol.spot_200510_hs.R;
 import java.text.DateFormat;
 import java.util.Date;
 
-class Location_Utils {
+public class Location_Utils {
 
-    static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
-
+    public static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
+    private static boolean Done = false;
     /**
      * Returns true if requesting location updates, otherwise returns false.
      *
      * @param context The {@link Context}.
      */
-    static boolean requestingLocationUpdates(Context context) {
+    public static boolean requestingLocationUpdates(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(KEY_REQUESTING_LOCATION_UPDATES, false);
     }
@@ -51,31 +51,26 @@ class Location_Utils {
                 .apply();
     }
 
-    /**
-     * Returns the {@code location} object as a human readable string.
-     * @param location  The {@link Location}.
-     */
-    static String getLocationText(Location location) {
-        return location == null ? "Unknown location" :
-                "(" + location.getLatitude() + ", " + location.getLongitude() + ")";
-    }
 
-    static double getLatitude(Location location) {
+    public static double getLatitude(Location location) {
         if(location != null){
             return location.getLatitude();
         }
         return 0;
     }
 
-    static double getLongitude(Location location) {
+    public static double getLongitude(Location location) {
         if(location != null){
             return location.getLongitude();
         }
         return 0;
     }
 
-    static String getLocationTitle(Context context) {
-        return context.getString(R.string.location_updated,
-                DateFormat.getDateTimeInstance().format(new Date()));
+    static void processDone(boolean done) {
+        Done = done;
+    }
+
+    public static Boolean processDone(){
+        return Done;
     }
 }

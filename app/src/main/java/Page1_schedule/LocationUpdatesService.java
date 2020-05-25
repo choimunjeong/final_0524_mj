@@ -25,6 +25,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
@@ -40,6 +41,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.hansol.spot_200510_hs.R;
@@ -55,100 +57,52 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * A bound and started service that is promoted to a foreground service when location updates have
- * been requested and all clients unbind.
- *
- * For apps running in the background on "O" devices, location is computed only once every 10
- * minutes and delivered batched every 30 minutes. This restriction applies even to apps
- * targeting "N" or lower which are run on "O" devices.
- *
- * This sample show how to use a long-running service for location updates. When an activity is
- * bound to this service, frequent location updates are permitted. When the activity is removed
- * from the foreground, the service promotes itself to a foreground service, and location updates
- * continue. When the activity comes back to the foreground, the foreground service stops, and the
- * notification associated with that service is removed.
- */
+import DB.Menu_DbOpenHelper;
+import Page1.Page1;
+
+
 public class LocationUpdatesService extends Service {
 
-    private static final String PACKAGE_NAME =
-            "com.google.android.gms.location.sample.locationupdatesforegroundservice";
-
+    private static final String PACKAGE_NAME = "com.google.android.gms.location.sample.locationupdatesforegroundservice";
     private static final String TAG = LocationUpdatesService.class.getSimpleName();
-
-    /**
-     * The name of the channel for notifications.
-     */
     private static final String CHANNEL_ID = "channel_01";
 
-    static final String ACTION_BROADCAST = PACKAGE_NAME + ".broadcast";
-
-    static final String EXTRA_LOCATION = PACKAGE_NAME + ".location";
-    private static final String EXTRA_STARTED_FROM_NOTIFICATION = PACKAGE_NAME +
-            ".started_from_notification";
-
+    public static final String ACTION_BROADCAST = PACKAGE_NAME + ".broadcast";
+    public static final String EXTRA_LOCATION = PACKAGE_NAME + ".location";
+    private static final String EXTRA_STARTED_FROM_NOTIFICATION = PACKAGE_NAME + ".started_from_notification";
     private final IBinder mBinder = new LocalBinder();
 
-    /**
-     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
-     */
+    //갱신 주기
     private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
-    /**
-     * The fastest rate for active location updates. Updates will never be more frequent
-     * than this value.
-     */
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
-            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
-
-    /**
-     * The identifier for the notification displayed for the foreground service.
-     */
+    //알람 관련
     private static final String NOTIFICATION_ID = "12345678";
-
-    /**
-     * Used to check whether the bound activity has really gone away and not unbound as part of an
-     * orientation change. We create a foreground service notification only if the former takes
-     * place.
-     */
     private boolean mChangingConfiguration = false;
-
     private NotificationManager mNotificationManager;
 
-    /**
-     * Contains parameters used by {@link com.google.android.gms.location.FusedLocationProviderApi}.
-     */
+    //위치 과련
     private LocationRequest mLocationRequest;
-
-    /**
-     * Provides access to the Fused Location Provider API.
-     */
     private FusedLocationProviderClient mFusedLocationClient;
-
-    /**
-     * Callback for changes in location.
-     */
     private LocationCallback mLocationCallback;
-
     private Handler mServiceHandler;
-
-    private List<String> data;
-    private String key;
-    private int length = -1;
-    private String  checkpostion;
-
-    /**
-     * The current location.
-     */
     private Location mLocation;
 
-    public LocationUpdatesService() {
-    }
+    //액티비티에서 받아온 값
+    private List<String> data;
+    private String date, key;
+    private int length = -1;
+    private String  checkpostion;
+    private String onoff = null;
+    private boolean alramOff = false;
+
+    public LocationUpdatesService() { }
+    private Menu_DbOpenHelper dbOpenHelper;
 
     @Override
     public void onCreate() {
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -165,17 +119,14 @@ public class LocationUpdatesService extends Service {
         mServiceHandler = new Handler(handlerThread.getLooper());
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = getString(R.string.app_name);
-            // Create the channel for the notification
-            NotificationChannel mChannel =
-                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
 
-            // Set the Notification Channel for the Notification Manager.
+            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
             mNotificationManager.createNotificationChannel(mChannel);
         }
     }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -192,65 +143,90 @@ public class LocationUpdatesService extends Service {
         return START_NOT_STICKY;
     }
 
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mChangingConfiguration = true;
     }
 
+
+    //앱이 화면에 실행중일때
     @Override
     public IBinder onBind(Intent intent) {
-        // Called when a client (MainActivity in case of this sample) comes to the foreground
-        // and binds with this service. The service should cease to be a foreground service
-        // when that happens.
         Log.i(TAG, "in onBind()");
         stopForeground(true);
         mChangingConfiguration = false;
         return mBinder;
     }
 
+
     @Override
     public void onRebind(Intent intent) {
-        // Called when a client (MainActivity in case of this sample) returns to the foreground
-        // and binds once again with this service. The service should cease to be a foreground
-        // service when that happens.
         Log.i(TAG, "in onRebind()");
         stopForeground(true);
         mChangingConfiguration = false;
         super.onRebind(intent);
     }
 
+
+
+    //앞에서 전달한 값을 연결
+    public  void getData(List<String> data){
+        this.data = data;
+    }
+    public  void getDate(String date){ this.date = date; }
+    public  void sendKey(String key){
+        this.key = key;
+    }
+
+
+    //화면을 종료했을 때
     @Override
     public boolean onUnbind(Intent intent) {
         Log.i(TAG, "Last client unbound from service");
 
-        // Called when the last client (MainActivity in case of this sample) unbinds from this
-        // service. If this method is called due to a configuration change in MainActivity, we
-        // do nothing. Otherwise, we make this service a foreground service.
-        if (!mChangingConfiguration && Location_Utils.requestingLocationUpdates(this)&& data.size() > 2) {
-            Log.i(TAG, "Starting foreground service");
-            startForeground(1234, getNotification("nodata"));
+        //데베 접근
+        dbOpenHelper = new Menu_DbOpenHelper(this);
+        dbOpenHelper.open();
+        dbOpenHelper.create();
+
+        Cursor iCursor = dbOpenHelper.selectColumns();
+        while(iCursor.moveToNext()){
+            onoff = iCursor.getString(iCursor.getColumnIndex("userid"));
         }
 
-        return true; // Ensures onRebind() is called when a client re-binds.
+        if (!alramOff && !mChangingConfiguration && Location_Utils.requestingLocationUpdates(this)&& data.size() > 1) {
+            Log.i(TAG, "Starting foreground service" + "/" + String.valueOf(data.size()));
+            startForeground(1234, getNotification("nodata"));
+        } else {
+            stopForeground(true);
+        }
 
+        //알림 껐을 때
+        if(  onoff.equals("false")) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                //stopForeground(true);
+                mNotificationManager.deleteNotificationChannel(CHANNEL_ID);
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                CharSequence name = getString(R.string.app_name);
+                NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+                mNotificationManager.createNotificationChannel(mChannel);
+            }
+        }
+        return true;
     }
+
 
     @Override
     public void onDestroy() {
         mServiceHandler.removeCallbacksAndMessages(null);
     }
 
-    public  void getData(List<String> data){
-        this.data = data;
-    }
-    public  void getDate(String key){
-        this.key = key;
-    }
-    /**
-     * Makes a request for location updates. Note that in this sample we merely log the
-     * {@link SecurityException}.
-     */
+
+    //위치 연결하는 부분
     public void requestLocationUpdates() {
         Log.i(TAG, "Requesting location updates"+data.get(0));
         Location_Utils.setRequestingLocationUpdates(this, true);
@@ -265,10 +241,7 @@ public class LocationUpdatesService extends Service {
     }
 
 
-    /**
-     * Removes location updates. Note that in this sample we merely log the
-     * {@link SecurityException}.
-     */
+
     public void removeLocationUpdates() {
         Log.i(TAG, "Removing location updates");
         try {
@@ -282,13 +255,14 @@ public class LocationUpdatesService extends Service {
     }
 
 
-    /**
-     * Returns the {@link NotificationCompat} used as part of the foreground service.
-     */
+    //알람 관련
     private Notification getNotification(String text) {
-       Intent  intent = new Intent(this, Page1_Main.class);
-        intent.putExtra("smsMsg" , length+1);
-        intent.putExtra("key",key);
+
+        //누르면 포그라운드에서 갖고 있던 값을 액티비티에 전달
+        Intent  intent = new Intent(this, Page1_Main.class);
+        intent.putExtra("smsMsg" , length+1);   //찾은 도시의 위치
+        intent.putExtra("date",date);                  //날짜
+        intent.putExtra("key", key);                   //데베 키
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         PendingIntent activityPendingIntent =
@@ -300,40 +274,38 @@ public class LocationUpdatesService extends Service {
         NotificationCompat.Builder builder;
 
 
+        //현 위치와 찾아야하는 도시가 맞지 않을 때
         if(text.equals("nodata")){
             builder = new NotificationCompat.Builder(this, NOTIFICATION_ID)
                     .setContentIntent(activityPendingIntent)
                     .setOngoing(true)
-                    .setContentText(text)
-                    .setContentTitle("찾는 중")
+                    .setContentText("현재 위치 찾는 중...")
+                    .setContentTitle("내로라")
                     .setSmallIcon(R.drawable.ic_heart_on)
                     .setDefaults(Notification.DEFAULT_LIGHTS)
                     .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher_foreground)) //BitMap 이미지 요구
                     .setWhen(System.currentTimeMillis());
+        }
 
 
-
-        } else {
+        //찾아야하는 도시를 찾았을 때
+        else {
              builder = new NotificationCompat.Builder(this, NOTIFICATION_ID)
                     .setContentIntent(activityPendingIntent)
-                    .setContentText(text)
-                    .setContentTitle(data.get(0))
+                    .setContentText(data.get(0)+"역에 도착했습니다.")
+                    .setContentTitle("내로라")
                     .setOngoing(true)
                     .setPriority(Notification.PRIORITY_HIGH)
                      .setDefaults(Notification.DEFAULT_SOUND)
                      .setSmallIcon(R.drawable.ic_heart_on)
                     .setTicker(text)
                     .setWhen(System.currentTimeMillis());
-
-
         }
 
+        //버전 관련
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder.setChannelId(CHANNEL_ID); // Channel ID
-
+            builder.setChannelId(CHANNEL_ID);
         }
-
-
         return builder.build();
     }
 
@@ -358,39 +330,54 @@ public class LocationUpdatesService extends Service {
     }
 
 
+    //위치가 갱신 됐을 때
     private void onNewLocation(Location location) {
         mLocation = location;
 
-        // Notify anyone listening for broadcasts about the new location.
         Intent intent = new Intent(ACTION_BROADCAST);
         intent.putExtra(EXTRA_LOCATION, location);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
 
-        // Update notification content if running as a foreground service.
         if (serviceIsRunningInForeground(this)) {
             double lat = location.getLatitude();
             double lon = location.getLongitude();
 
             checkpostion = getCurrentAddress(lat, lon);
             Log.i("갱신", checkpostion);
+            Log.i("length", String.valueOf(length));
 
-            if(checkpostion.contains(data.get(0))){
 
-                mNotificationManager.notify(1234, getNotification(checkpostion));
+            //시연용
+            mNotificationManager.notify(1234, getNotification(checkpostion));
+            if(data.size() > 1){
                 data.remove(0);
                 length++;
-                Log.i("포함되어 있음", "굿굿"+String.valueOf(length));
-            } else {
-                Log.i("포함되어 있지않음", data.get(length));
-               // mNotificationManager.notify(1234, getNotification("nodata"));
+            }
+            if(data.size() == 1){
+                Intent intent2 = new Intent(this, Page1.class);
+//                intent.putExtra("smsMsg" , length+1);   //찾은 도시의 위치
+//                intent.putExtra("date",date);                  //날짜
+                intent2.putExtra("key", "off");                   //데베 키
+                intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent2);
             }
 
+
+
+            //현위치와 배열에 있는 도시를 검색
+//            if(checkpostion.contains(data.get(0))){
+//                if(!onoff.equals("off")) {
+//                //    mNotificationManager.notify(1234, getNotification(checkpostion));
+//                }
+//                data.remove(0);
+//                length++;
+//                Log.i("포함되어 있음", "굿굿"+String.valueOf(length));
+//            }
         }
     }
 
-    /**
-     * Sets the location request parameters.
-     */
+
+
     private void createLocationRequest() {
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
@@ -398,21 +385,15 @@ public class LocationUpdatesService extends Service {
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
-    /**
-     * Class used for the client Binder.  Since this service runs in the same process as its
-     * clients, we don't need to deal with IPC.
-     */
+
+
     public class LocalBinder extends Binder {
-        LocationUpdatesService getService() {
+        public LocationUpdatesService getService() {
             return LocationUpdatesService.this;
         }
     }
 
-    /**
-     * Returns true if this is a foreground service.
-     *
-     * @param context The {@link Context}.
-     */
+
     public boolean serviceIsRunningInForeground(Context context) {
         ActivityManager manager = (ActivityManager) context.getSystemService(
                 Context.ACTIVITY_SERVICE);
@@ -427,6 +408,8 @@ public class LocationUpdatesService extends Service {
         return false;
     }
 
+
+
     //GPS를 주소로 변환
     public String getCurrentAddress( double latitude, double longitude) {
 
@@ -435,7 +418,6 @@ public class LocationUpdatesService extends Service {
         try {
             addresses = geocoder.getFromLocation(latitude, longitude, 7);
         } catch (IOException ioException) {
-            //네트워크 문제
             Toast.makeText(this, "네트워크를 연결해주세요.", Toast.LENGTH_LONG).show();
             return "지오코더 서비스 사용불가";
         } catch (IllegalArgumentException illegalArgumentException) {
@@ -443,14 +425,14 @@ public class LocationUpdatesService extends Service {
             return "잘못된 GPS 좌표";
         }
 
-
         if (addresses == null || addresses.size() == 0) {
             Toast.makeText(this, "주소 미발견", Toast.LENGTH_LONG).show();
             return "주소 미발견";
         }
-
         Address address = addresses.get(0);
         return address.getAddressLine(0).toString()+"\n";
     }
+
+
 
 }

@@ -104,13 +104,17 @@
             android:textSize="12sp"/>
 
         //위치 토글 버튼
-        <ToggleButton
+        <Switch
             android:id="@+id/menu_postion_btn"
-            android:layout_width="50dp"
+            android:layout_width="60dp"
             android:layout_height="30dp"
             android:layout_below="@id/menu_settingIcon"
             android:layout_alignParentRight="true"
-            android:textSize="10dp"/>
+            android:showText="true"
+            android:textOn="ON"
+            android:textOff="OFF"
+            android:switchMinWidth="50dp"
+            android:switchTextAppearance="@style/SwitchTextAppearance"/>
 
         //알람 텍스트
         <TextView
@@ -125,13 +129,18 @@
             android:textSize="12sp"/>
 
         //알람 버튼
-        <ToggleButton
+        <Switch
             android:id="@+id/menu_alram_btn"
-            android:layout_width="50dp"
+            android:layout_width="60dp"
             android:layout_height="30dp"
             android:layout_below="@id/menu_postion_btn"
             android:layout_alignParentRight="true"
-            android:textSize="10dp"/>
+            android:showText="true"
+            android:textOn="ON"
+            android:textOff="OFF"
+            android:switchMinWidth="50dp"
+            android:switchTextAppearance="@style/SwitchTextAppearance"/>
+
     </RelativeLayout>
 
 </LinearLayout>

@@ -33,16 +33,14 @@ public class Page1_pagerAdapter extends PagerAdapter {
 
     //위치 관련
     private Page1_Position page1_position;
-    private int gotData;
     private boolean First_click= false;
 
 
-    public Page1_pagerAdapter(send_expand send, Context context, List<String> arrayList, Page1_Position page1_position, int gotData){
+    public Page1_pagerAdapter(send_expand send, Context context, List<String> arrayList, Page1_Position page1_position){
         this.send = send;
         mContext = context;
         localArray = arrayList;
         this.page1_position = page1_position;
-        this.gotData = gotData;
     }
 
 
@@ -70,15 +68,13 @@ public class Page1_pagerAdapter extends PagerAdapter {
         View view = null ;
         benefit_list();
 
-        if (mContext != null) {
+        //액티비티에서 현재 시간에 해당되는 페이지 위치 얻기
+        int gotPosition = send.gotPosition();
 
+        if (mContext != null) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.page1_viewpager, container, false);
             stationName = localArray.get(position).trim();
-            if(stationName.contains("환승")){
-                stationName2 = stationName.substring(4);
-            }else
-                stationName2 = stationName;
 
             final TextView textView =  view.findViewById(R.id.page1_stnName) ;
             textView.setText(stationName+"역") ;
@@ -92,56 +88,72 @@ public class Page1_pagerAdapter extends PagerAdapter {
             final LinearLayout page1_pager_layout =  view.findViewById(R.id.page1_pager_layout);
             final RelativeLayout page1_gift_layout =  view.findViewById(R.id.page1_gift_layout);
 
-            //첫번째 페이지가 아니면
-            if(position > 0) {
-                checkIn_btn.setText("해당역에 도착");
+
+
+            //버튼 관련-----------------------------------------
+            //첫번째 페이지
+            if(position == 0 && position==gotPosition) {
+                checkIn_btn.setText("여행 시작하기");
+                checkIn_btn.setClickable(true);
+                pre_station.setVisibility(View.INVISIBLE);
+                next_station.setVisibility(View.VISIBLE);
+                now_station.setVisibility(View.VISIBLE);
+            }
+
+            //현재역보다 이전역이면
+            else if ( position < gotPosition){
                 pre_station.setVisibility(View.INVISIBLE);
                 next_station.setVisibility(View.INVISIBLE);
                 now_station.setVisibility(View.INVISIBLE);
+                checkIn_btn.setText("여행완료");
+                checkIn_btn.setSelected(true);
+                checkIn_btn.setTextColor(Color.parseColor("#FFFEFE"));
+                page1_pager_layout.setBackgroundResource(R.drawable.rectangle4);
+                page1_gift_layout.setBackgroundResource(R.drawable.rectangle4);
+                textView.setTextColor(Color.parseColor("#2D624F"));
+            }
+
+            //현재역이면
+            else if(position == gotPosition){
+                pre_station.setVisibility(View.VISIBLE);
+                next_station.setVisibility(View.VISIBLE);
+                now_station.setVisibility(View.VISIBLE);
+                checkIn_btn.setText("여행중");
+                checkIn_btn.setSelected(true);
+                checkIn_btn.setTextColor(Color.parseColor("#FFFEFE"));
+                page1_pager_layout.setBackgroundResource(R.drawable.rectangle4);
+                page1_gift_layout.setBackgroundResource(R.drawable.rectangle4);
+                textView.setTextColor(Color.parseColor("#2D624F"));
+            }
+
+            //현재역 다음역이면
+            else if( position < gotPosition){
+                pre_station.setVisibility(View.INVISIBLE);
+                next_station.setVisibility(View.INVISIBLE);
+                now_station.setVisibility(View.INVISIBLE);
+                checkIn_btn.setText("여행 예정역");
+                checkIn_btn.setSelected(true);
             }
 
 
 
-           //여행 시작하기 or 도착확인 버튼
+           //여행 시작하기 버튼
             checkIn_btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick (View view){
-
-                    //여행 시작하기-----------------------------여기는 아직 추가 ㄴㄴ (위치관련임)
-                    if(position == 0 && !First_click) {
-                        //위치 권한 + 서비스 사용 요청
+                    //여행 시작하기 : 위치 권한 + 서비스 사용 요청
+                    if(position == 0) {
                         page1_position.onClick_startBtn();
-                        First_click = true;
-                    } else if( position == 0) {
-                        checkIn_btn.setText("여행 시작");
-                        checkIn_btn.setTextColor(Color.parseColor("#FFFEFE"));
+                        checkIn_btn.setText("여행중");
                         checkIn_btn.setSelected(true);
-                        page1_pager_layout.setBackgroundResource(R.drawable.rectangle4);
-                        page1_gift_layout.setBackgroundResource(R.drawable.rectangle4);
-                        textView.setTextColor(Color.parseColor("#2D624F"));
-                    }
-
-                    //도착 확인 버튼
-                    else {
-                        pre_station.setText("< 이전역");
-                        pre_station.setVisibility(View.VISIBLE);
-                        next_station.setVisibility(View.VISIBLE);
-                        now_station.setVisibility(View.VISIBLE);
-
-                        //마지막 페이지가 아니라면
-                        if(position != localArray.size()-1){
-                            next_station.setVisibility(View.VISIBLE);
-                        }
-
-                        checkIn_btn.setText("도착 확인");
                         checkIn_btn.setTextColor(Color.parseColor("#FFFEFE"));
-                        checkIn_btn.setSelected(true);
                         page1_pager_layout.setBackgroundResource(R.drawable.rectangle4);
                         page1_gift_layout.setBackgroundResource(R.drawable.rectangle4);
                         textView.setTextColor(Color.parseColor("#2D624F"));
                     }
                 }
             });
+
 
 
             //혜택보기 레이아웃 펼치기----------------------------------------------여기 수정함
@@ -167,7 +179,7 @@ public class Page1_pagerAdapter extends PagerAdapter {
                         }
                         check_updown_btn.setBackgroundResource(R.drawable.ic_down_btn);
                         benefit_text.setVisibility(View.VISIBLE);
-                        page1_gift_layout.getLayoutParams().height = (int)(150*d);
+                        page1_gift_layout.getLayoutParams().height = (int)(170*d);
                         page1_gift_layout.requestLayout();
                         send.send(isExpand);
                         isExpand = true;
@@ -195,6 +207,7 @@ public class Page1_pagerAdapter extends PagerAdapter {
     //뷰페이져 확장을 위한 인터페이스
     public interface send_expand{
         void send(boolean isExpand);
+        int gotPosition();
     }
 
 
@@ -219,5 +232,6 @@ public class Page1_pagerAdapter extends PagerAdapter {
         benefit.put("신경주" ,"불국사 입장권 (*신경주역,경주역,서경주역,불국사역 발권자 한정)");
         benefit.put("안동" ,"숙박 및 시티투어 할인권");
     }
+
 
 }

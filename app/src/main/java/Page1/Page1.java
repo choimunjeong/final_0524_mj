@@ -1,46 +1,64 @@
 package Page1;
 
+import android.Manifest;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Location;
 import android.os.Build;
 
 import DB.DbOpenHelper;
 import DB.Heart_page;
+import DB.Menu_DbOpenHelper;
+import Page1_schedule.LocationUpdatesService;
+import Page1_schedule.Location_Utils;
+import Page1_schedule.Page1_Main;
 import Page2_X.Page2_X;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.example.hansol.spot_200510_hs.R;
 import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import Page2_X.Page2_X_Main;
 import Page2.Page2;
@@ -49,7 +67,7 @@ import Page3.Page3_Main;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 
-public class Page1 extends AppCompatActivity implements View.OnClickListener {
+public class Page1 extends AppCompatActivity implements View.OnClickListener , SharedPreferences.OnSharedPreferenceChangeListener {
 
     // 부모 뷰
     private Context context;
@@ -69,13 +87,34 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
     private TextView userText1;
     private TextView userText2;
     private RecyclerView recyclerView1;
-    private ToggleButton positionBtn;
-    private ToggleButton alramBtn;
+    private Switch positionBtn;
+    private Switch alramBtn;
     Main_RecyclerviewAdapter adapter;
     ArrayList<String> name = new ArrayList<>();
     private Toolbar toolbar2;
     private DrawerLayout drawer;
     private EndDrawerToggle mDrawerToggle;
+
+    //위치서비스 관련
+    private MyReceiver myReceiver;
+    private boolean mBound = false;
+    private LocationUpdatesService mService = null;
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LocationUpdatesService.LocalBinder binder = (LocationUpdatesService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+            mBound = false;
+        }
+    };
+
+    private Menu_DbOpenHelper menu_dbOpenHelper;
+    private List<String> onoff = new ArrayList<>();
     //******************************************************************************************
 
     String cat_text = null;   // 카테고리 이름
@@ -102,8 +141,6 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
 
     private DbOpenHelper mDbOpenHelper;
     String sort = "userid";
-
-
 
 
 
@@ -134,7 +171,8 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
         userImg = (ImageView)findViewById(R.id.menu_userImage);
         userText1 = (TextView)findViewById(R.id.menu_text1);
         userText2 = (TextView)findViewById(R.id.menu_text2);
-        positionBtn = (ToggleButton)findViewById(R.id.menu_postion_btn);
+        positionBtn = (Switch)findViewById(R.id.menu_postion_btn);
+        alramBtn = (Switch)findViewById(R.id.menu_alram_btn);
         recyclerView1 = (RecyclerView)findViewById(R.id.menu_recyclerview1);
 
 
@@ -149,8 +187,7 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
             }
         };
 
-      //  supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-       // getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+
         setSupportActionBar(toolbar2);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#000000ff")));
@@ -167,6 +204,52 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
         name.add("0");
         name.add("1");
         name.add("2");
+
+        // DB열기
+        menu_dbOpenHelper = new Menu_DbOpenHelper(this);
+        menu_dbOpenHelper.open();
+        menu_dbOpenHelper.create();
+        notity_listner("");
+
+
+
+        //위치 스위치 관련
+        myReceiver = new MyReceiver();
+        setButtonsState(Location_Utils.requestingLocationUpdates(this));
+        positionBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    Toast.makeText(getApplicationContext(), "눌렀따", Toast.LENGTH_SHORT).show();
+                     notity_listner("");
+                } else {
+                    mService.removeLocationUpdates();
+                }
+            }
+        });
+
+
+
+
+        //알림 스위치 버튼
+        setButtonsState_notity();
+        alramBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    menu_dbOpenHelper.open();
+                    menu_dbOpenHelper.deleteAllColumns();
+                    menu_dbOpenHelper.insertColumn("true", "0");
+                  //  menu_dbOpenHelper.close();
+
+                }else {
+                    menu_dbOpenHelper.open();
+                    menu_dbOpenHelper.deleteAllColumns();
+                    menu_dbOpenHelper.insertColumn("false", "0");
+                  //  menu_dbOpenHelper.close();
+                }
+            }
+        });
 
 
         //******************************************************************************************
@@ -189,14 +272,29 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
         showDatabase(sort);
 
         final Intent intent = getIntent();
+        String key =  intent.getStringExtra("key");
+        if(key != null){
+            Log.i("받음?", key);
+            Handler handler  = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mService.removeLocationUpdates();
+                }
+            }, 500);
+
+        }
+
+
         // 나중에 하기 버튼 눌렀을 때 임의의 값 넘겨주기
         if (intent.hasExtra("Main")) {
             score = intent.getIntArrayExtra("Main");
+
         } else {
             // 설문조사 진행 했을 때
             score = intent.getIntArrayExtra("Page9");
         }
-
+        score = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
         main_schedule = (ImageButton) findViewById(R.id.main_schedule);
         main_register = (ImageButton) findViewById(R.id.main_register);
         main_like = (ImageButton) findViewById(R.id.main_spot);
@@ -571,26 +669,6 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
         }
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_scrolling, menu);
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
 
 
     @Override
@@ -618,6 +696,8 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
         startActivity(intent);
     }
 
+
+
     public class City {
         private String cityName;
         private int cityPic;
@@ -639,9 +719,10 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
         }
     }
 
+
+
     public void showDatabase(String sort){
         Cursor iCursor = mDbOpenHelper.selectColumns();
-        //iCursor.moveToFirst();
         Log.d("showDatabase", "DB Size: " + iCursor.getCount());
         mySpot.clear();
 
@@ -653,6 +734,8 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
         }
     }
 
+
+
     public String setTextLength(String text, int length){
         if(text.length()<length){
             int gap = length - text.length();
@@ -663,11 +746,15 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
         return text;
     }
 
+
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(0,0);
     }
+
+
 
     // 현재 액티비티 새로고침
     @Override
@@ -675,5 +762,99 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener {
         super.onRestart();
         finish();
         startActivity(getIntent());
+    }
+
+
+
+    /*위치&알림 스위치 버튼 관련***********************************************************************************************/
+    @Override
+    protected void onStart() {
+        super.onStart();
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+        bindService(new Intent(this, LocationUpdatesService.class), mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver, new IntentFilter(LocationUpdatesService.ACTION_BROADCAST));
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(myReceiver);
+        super.onPause();
+    }
+
+
+    @Override
+    protected void onStop() {
+        if (mBound) {
+            unbindService(mServiceConnection);
+            mBound = false;
+        }
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    //위치 스위치 상태
+    private void setButtonsState(boolean requestingLocationUpdates ) {
+        if (requestingLocationUpdates) {
+            positionBtn.setChecked(true);
+        } else if( !requestingLocationUpdates){
+            positionBtn.setChecked(false);
+        }
+    }
+
+    //알림 스위치 상태
+    private void setButtonsState_notity() {
+        if (onoff.get(0).equals("true")) {
+            alramBtn.setChecked(true);
+        } else {
+            alramBtn.setChecked(false);
+        }
+
+    }
+
+
+   //포그라운드와 연결 ( 핸드폰 껐을 때도 돌아가도록 하는 부분)
+    private class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
+            if (location != null) {
+            }
+        }
+    }
+
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+    }
+
+
+    public void notity_listner(String sort){
+        Cursor iCursor = menu_dbOpenHelper.selectColumns();
+
+        while(iCursor.moveToNext()){
+            String  id = iCursor.getString(iCursor.getColumnIndex("userid"));
+            Log.i("갑자기 왜 안돼", String.valueOf(iCursor.getCount()) + "/" + id);
+            onoff.add(id);
+        }
+
+        //최초 실행을 위함
+        if(iCursor.getCount() == 0){
+            menu_dbOpenHelper.insertColumn("true", "0");
+            onoff.add("true");
+        }
     }
 }

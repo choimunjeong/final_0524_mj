@@ -11,6 +11,7 @@
     <string name="train_err_internet">[ERROR] 네트워크를 연결해주세요. </string>
     <string name="train_err_api">[ERROR] 일시적으로 데이터를 수집할 수 없습니다. </string>
     <string name="train_err_course">해당 날짜에 검색되는 기차시간이 없습니다.  </string>
+    <string name="train_err_time">지난 일정의 시간표는 제공하지 않습니다.  </string>
 
     <!--    위치 관련    -->
     <string name="launch_activity">Launch activity</string>

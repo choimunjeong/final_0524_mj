@@ -46,7 +46,8 @@
         <activity android:name="Page2_X.Page2_X" />
         <activity android:name="Page2_X.Page2_X_Main"/>
         <activity android:name="DB.Heart_page"/>
-        <activity android:name="Page3.Page3_Main"/>
+        <activity android:name="Page3.Page3_Main"
+            android:windowSoftInputMode="adjustPan"/>
         <activity android:name="Page3_1.Page3_1_Main"/>
         <activity android:name="Page3_1_1.Page3_1_1_Main"/>
         <activity android:name="Page3_1_1_1.Page3_1_1_1_Main"/>

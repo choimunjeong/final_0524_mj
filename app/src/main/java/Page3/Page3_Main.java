@@ -11,9 +11,12 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -27,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -266,6 +270,7 @@ public class Page3_Main extends AppCompatActivity {
                 scrollView.post(new Runnable() {
                     @Override
                     public void run() {
+                        autoCompleteTextView.setText(""); //-------------------------------------------------<---여기 추가
 
                         //키보드 올라와 있으면 작동 안함
                         scrollView.fullScroll(ScrollView.FOCUS_DOWN);
@@ -274,6 +279,7 @@ public class Page3_Main extends AppCompatActivity {
                 return false;
             }
         });
+
 
 
         //자동입력에서 항목을 터치했을 때, 키보드가 바로 내려감 + 웹뷰에서 해당역에 출경도 버튼 띄워짐

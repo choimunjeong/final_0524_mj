@@ -778,7 +778,7 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
             showDialogForLocationServiceSetting();
         } else if (!checkPermissions()) {
             requestPermissions();
-            Toast.makeText(getApplicationContext(), "한번 더 눌러주세요.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "한번 더 눌러주세요.", Toast.LENGTH_LONG).show();
         } else
          {
             //포그라운드로 도시,날짜,데베키를 보냄

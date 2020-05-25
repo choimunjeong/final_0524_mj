@@ -718,6 +718,8 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
         return  arraysum;
     }
 
+
+    //오류메시지
     private void err_message(){
         if(completeList.size() < 1){
 
@@ -776,7 +778,9 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
             showDialogForLocationServiceSetting();
         } else if (!checkPermissions()) {
             requestPermissions();
-        } else {
+            Toast.makeText(getApplicationContext(), "한번 더 눌러주세요.", Toast.LENGTH_SHORT).show();
+        } else
+         {
             //포그라운드로 도시,날짜,데베키를 보냄
             mService.getData(arrayLocal);
             mService.getDate(startDate);
@@ -990,7 +994,7 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
             Day_items.clear();
             completeList.clear();
             getPosition.clear();
-            Log.i("여긴가", "3");
+
             Day_schedule_data(stationWithTransfer.get(gotData));
             if (isNetworkConnect != 3) {
                 send_Api(stationWithTransfer.get(gotData));

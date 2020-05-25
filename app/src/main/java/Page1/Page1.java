@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -56,6 +57,7 @@ import android.widget.Toast;
 
 import com.example.hansol.spot_200510_hs.R;
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,6 +101,7 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
     private MyReceiver myReceiver;
     private boolean mBound = false;
     private LocationUpdatesService mService = null;
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -220,8 +223,7 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    Toast.makeText(getApplicationContext(), "눌렀따", Toast.LENGTH_SHORT).show();
-                     notity_listner("");
+
                 } else {
                     mService.removeLocationUpdates();
                 }
@@ -252,6 +254,20 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
         });
 
 
+
+        //백그라운드에서 위치가 다 돌았을 때 화면 켜지고 연결 해제
+        final Intent intent = getIntent();
+        String key =  intent.getStringExtra("key");
+        if(key != null){
+            Log.i("받음?", key);
+            Handler handler  = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mService.removeLocationUpdates();
+                }
+            }, 500);
+        }
         //******************************************************************************************
 
 
@@ -270,20 +286,6 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
         mDbOpenHelper.create();
 
         showDatabase(sort);
-
-        final Intent intent = getIntent();
-        String key =  intent.getStringExtra("key");
-        if(key != null){
-            Log.i("받음?", key);
-            Handler handler  = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mService.removeLocationUpdates();
-                }
-            }, 500);
-
-        }
 
 
         // 나중에 하기 버튼 눌렀을 때 임의의 값 넘겨주기
@@ -801,10 +803,14 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
         super.onStop();
     }
 
+
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
     }
+
+
 
     //위치 스위치 상태
     private void setButtonsState(boolean requestingLocationUpdates ) {
@@ -814,6 +820,8 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
             positionBtn.setChecked(false);
         }
     }
+
+
 
     //알림 스위치 상태
     private void setButtonsState_notity() {
@@ -826,6 +834,7 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
     }
 
 
+
    //포그라운드와 연결 ( 핸드폰 껐을 때도 돌아가도록 하는 부분)
     private class MyReceiver extends BroadcastReceiver {
         @Override
@@ -835,6 +844,7 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
             }
         }
     }
+
 
 
     @Override
@@ -857,4 +867,6 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
             onoff.add("true");
         }
     }
+
+
 }

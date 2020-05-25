@@ -117,7 +117,7 @@ public class Page3_1_1_Main extends AppCompatActivity implements Page3_1_1_addBo
             @Override
             public void onChanged() {
                 super.onChanged();
-                Page3_1_1_addConformDialog conformDialog = Page3_1_1_addConformDialog.getInstance(list.get(list.size()-1).getName(), date, dayPass);
+                Page3_1_1_addConformDialog conformDialog = Page3_1_1_addConformDialog.getInstance(list.get(list.size()-2).getName(), date, dayPass);
                 conformDialog.show(getSupportFragmentManager(), "confirm");
             }
         });
@@ -202,7 +202,7 @@ public class Page3_1_1_Main extends AppCompatActivity implements Page3_1_1_addBo
     @Override
     public void onsetlist(String text) {
         if(list.size() < 10){
-            list.add(new Page3_1_1_dargData(text , number));
+            list.add(list.size()-1, new Page3_1_1_dargData(text , number));
             adapter.notifyDataSetChanged();
         } else {
             android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
@@ -219,14 +219,13 @@ public class Page3_1_1_Main extends AppCompatActivity implements Page3_1_1_addBo
 
 
 
-    //추가된 역을 반영해서 새로운 알고리즘을 돌리기 위한 인터페이스
+    //추가된 역을 반영해서 새로운 알고리즘을 돌리기 위한 인터페이스------------------------------------------<-------------여기 수정
     @Override
     public void go_algorithm_page() {
         settingList();
 
         //값을 전달할 리스트(send_list)와 도착역과 추가역의 순서를 바꿔줄 리스트(send_list_change)
         ArrayList<send_data> send_list = new ArrayList<send_data>();
-        ArrayList<send_data> send_list_change = new ArrayList<send_data>();
 
         //선택된 역 이름을 번호와 함께 넘겨준다.
         for(int i=0; i<list.size(); i++){
@@ -236,16 +235,6 @@ public class Page3_1_1_Main extends AppCompatActivity implements Page3_1_1_addBo
                 }
             }
         }
-
-        //마지막 역은 추가된 역이므로 마지막전역(진짜 도착역)과 순서를 바꿔야 한다.
-        send_list_change.add(new send_data(send_list.get(send_list.size()-1).getCode(), list.get(list.size()-1).getName()));
-        send_list_change.add(new send_data(send_list.get(send_list.size()-2).getCode(), list.get(list.size()-2).getName()));
-
-        send_list.remove(send_list.size()-1);
-        send_list.remove(send_list.size()-1);
-
-        send_list.add(send_list_change.get(0));
-        send_list.add(send_list_change.get(1));
 
 
         Intent intent = new Intent(this, Page3_1_Main.class);

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -47,6 +48,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import DB.Page3_DbOpenHelper;
 import Page3_1.Page3_1_Main;
 
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
@@ -63,7 +65,7 @@ public class Page3_Main extends AppCompatActivity {
 
     //page2 액티비티에서 받은 값 관련
     ArrayList<String> course = null;
-    ArrayList<String> course2 = null;
+    ArrayList<String> course2 =null;
 
 
     //svg 지도
@@ -108,7 +110,13 @@ public class Page3_Main extends AppCompatActivity {
     //다음 페이지로 값을 전달할 list
     ArrayList <send_data> send_list = new ArrayList<send_data>();
 
-    boolean fromPage2 = false;
+
+    //데이터베이스 관련--------------------------------------여기추가
+    Page3_DbOpenHelper page3_dbOpenHelper;
+    String forDB = "";
+    String daypassFromDB = null;
+    ArrayList<String> stationFromDB;
+
 
 
 
@@ -119,8 +127,20 @@ public class Page3_Main extends AppCompatActivity {
 
         //page2에서 값을 받아온다
         Intent intent = getIntent();
+        daypassFromDB = intent.getStringExtra("daypassFromDB");
         course = (ArrayList<String>)intent.getSerializableExtra("course") ;
         course2 = (ArrayList<String>)intent.getSerializableExtra("course2") ;
+
+
+        //데베 생성----------------------------------------------------------------여기 아래 추가
+        page3_dbOpenHelper = new Page3_DbOpenHelper(this);
+        page3_dbOpenHelper.open();
+        page3_dbOpenHelper.create();
+
+
+
+
+
 
 
 
@@ -163,6 +183,32 @@ public class Page3_Main extends AppCompatActivity {
                 }
             }
         };
+
+
+        //데베에서 값을 받으면 이용권 세팅
+        if (daypassFromDB != null) {
+            switch (daypassFromDB) {
+                case "3일권":
+                    dateOk = true;
+                    dayPass = "3일권";
+                    dayPass_3.setSelected(true);
+                    dayPass_3.setTextColor(getResources().getColorStateList(R.color.btn_ticket_text));
+                    break;
+                case "5일권":
+                    dateOk = true;
+                    dayPass = "5일권";
+                    dayPass_5.setSelected(true);
+                    dayPass_5.setTextColor(getResources().getColorStateList(R.color.btn_ticket_text));
+                    break;
+                case "7일권":
+                    dateOk = true;
+                    dayPass = "7일권";
+                    dayPass_7.setSelected(true);
+                    dayPass_7.setTextColor(getResources().getColorStateList(R.color.btn_ticket_text));
+                    break;
+            }
+        }
+
 
         dayPass_3.setOnClickListener(onClickListener);
         dayPass_5.setOnClickListener(onClickListener);
@@ -344,6 +390,8 @@ public class Page3_Main extends AppCompatActivity {
             }
         });
 
+
+
         if (course!=null) {
             for (int i = 0; i < course.size(); i++) {
                 if (i == 0) {
@@ -360,11 +408,7 @@ public class Page3_Main extends AppCompatActivity {
                     mTagContainerLayout1.addTag(course.get(i));
                     list1.add(course.get(i));
                     middleOk = true;
-
-
-
                 }
-                //page3_svg.loadUrl("javascript:setMessage('" + course + "')");
             }
         }
 
@@ -384,11 +428,7 @@ public class Page3_Main extends AppCompatActivity {
                     mTagContainerLayout1.addTag(course2.get(i));
                     list1.add(course2.get(i));
                     middleOk = true;
-
-
-
                 }
-                //page3_svg.loadUrl("javascript:setMessage('" + course + "')");
             }
         }
 
@@ -528,9 +568,17 @@ public class Page3_Main extends AppCompatActivity {
                         for(int j=0; j<237; j++){
                             if(list1.get(i).equals(name[j])){
                                 send_list.add(new send_data(code[j],name[j]) );
+
+                                //선택된 역을 하나의 string 으로 넣어줌-------------------------------------------여기추가
+                                forDB = forDB + "," + name[j];
                             }
                         }
                     }
+
+                    //값을 데베에 저장
+                    page3_dbOpenHelper.open();
+                    page3_dbOpenHelper.insertColumn( dayPass, forDB);
+                    Log.i("이렇게 저장됨", dayPass+forDB);
 
                     Intent intent = new Intent(getApplicationContext(), Page3_1_Main.class);
                     intent.putExtra("list", (Serializable) send_list);           //추가된 역
@@ -646,6 +694,7 @@ public class Page3_Main extends AppCompatActivity {
             list.add(name[i]);
         }
     }
+
 
 
 }

@@ -77,6 +77,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import DB.Menu_DbOpenHelper;
+import DB.Page3_DbOpenHelper;
 import DB.Train_DbOpenHelper;
 import Page1.Page1;
 import Page2_1_1.NetworkStatus;
@@ -649,7 +650,7 @@ public class Page1_Main extends AppCompatActivity implements  Page1_pagerAdapter
             try{
                 url = new URL("http://openapi.tago.go.kr/openapi/service/TrainInfoService/" +
                         "getStrtpntAlocFndTrainInfo?serviceKey=Z2ABtX1mu7Z%2FVsuir30gFJ%2BRDlNdWq8ujTgba2ZIu%2BRRiT65hy%2BOVzjmZxFXW04kGY08%2FgNrX7w%2BCexXYOz6Jg%3D%3D" +
-                        "numOfRows=2" +
+                        "&numOfRows=2" +
                         "&pageNo=1&" +
                         "depPlaceId=" + startCode +
                         "&arrPlaceId=" + endCode +

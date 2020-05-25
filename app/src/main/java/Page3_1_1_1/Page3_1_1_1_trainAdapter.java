@@ -10,6 +10,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -180,6 +181,16 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
         else {
             CityViewHolder cityViewHolder = (CityViewHolder) holder;
             cityViewHolder.city_text.setText(item.text);
+
+            //삭제누르면------------------여기추가-------------------------------------------------
+            cityViewHolder.delete_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    items.remove(position);
+                    notifyItemRemoved(position);
+                    notifyItemRangeChanged(position, items.size());
+                }
+            });
         }
     }
 
@@ -355,13 +366,15 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
 
 
 
-    //시티 xml 연결
+    //시티 xml 연결------------------------------------------------------------여기 아래에 버튼 추가
     public class CityViewHolder extends RecyclerView.ViewHolder {
-        public TextView city_text;
+        private TextView city_text;
+        private Button delete_btn;
 
         public CityViewHolder(View itemView) {
             super(itemView);
-            city_text = (TextView) itemView.findViewById(R.id.page3_1_1_1_cityText);
+            city_text =  itemView.findViewById(R.id.page3_1_1_1_cityText);
+            delete_btn = itemView.findViewById(R.id.page3_1_1_1_tourDelete);
         }
     }
 
@@ -424,14 +437,14 @@ public class Page3_1_1_1_trainAdapter extends RecyclerView.Adapter<RecyclerView.
             try{
                 url = new URL("http://openapi.tago.go.kr/openapi/service/TrainInfoService/" +
                         "getStrtpntAlocFndTrainInfo?serviceKey=Z2ABtX1mu7Z%2FVsuir30gFJ%2BRDlNdWq8ujTgba2ZIu%2BRRiT65hy%2BOVzjmZxFXW04kGY08%2FgNrX7w%2BCexXYOz6Jg%3D%3D" +
-                        "numOfRows=10" +
+                        "&numOfRows=10" +
                         "&pageNo=1&" +
                         "depPlaceId=" + startCode +
                         "&arrPlaceId=" + endCode +
                         "&depPlandTime=" + date +
                         "&trainGradeCode=" + trainCode +
                         "&_type=json");
-
+                Log.i("유알엘", String.valueOf(url));
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
                 if (conn.getResponseCode() == conn.HTTP_OK) {

@@ -1,6 +1,7 @@
 package Page1;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -21,6 +22,7 @@ import android.os.Build;
 import DB.DbOpenHelper;
 import DB.Heart_page;
 import DB.Menu_DbOpenHelper;
+import DB.Page3_DbOpenHelper;
 import Page1_schedule.LocationUpdatesService;
 import Page1_schedule.Location_Utils;
 import Page1_schedule.Page1_Main;
@@ -59,6 +61,7 @@ import com.example.hansol.spot_200510_hs.R;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -142,6 +145,7 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
     // 찜한 여행지 저장하는 리스트
     private ArrayList<String > mySpot = new ArrayList<String >();
 
+    private Page3_DbOpenHelper page3_dbOpenHelper;
     private DbOpenHelper mDbOpenHelper;
     String sort = "userid";
 
@@ -268,9 +272,12 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
                 }
             }, 500);
         }
-        //******************************************************************************************
 
 
+        //------------------------05/25 23:53 추가---------------------스케줄 누르면 데베에 저장된 값 있는지 검사하고 있으면 불러오겠냐고 물어보기위함
+        page3_dbOpenHelper = new Page3_DbOpenHelper(this);
+        page3_dbOpenHelper.open();
+        page3_dbOpenHelper.create();
 
 
 
@@ -306,11 +313,7 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
         main_schedule.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent scheduleIntent = new Intent(getApplicationContext(), Page3_Main.class);
-                scheduleIntent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
-                scheduleIntent.addFlags(FLAG_ACTIVITY_NO_ANIMATION);
-                startActivity(scheduleIntent);
-
+                get_databese();  //<<---------------------------------------------------여기 추가
             }
         });
 
@@ -857,7 +860,6 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
 
         while(iCursor.moveToNext()){
             String  id = iCursor.getString(iCursor.getColumnIndex("userid"));
-            Log.i("갑자기 왜 안돼", String.valueOf(iCursor.getCount()) + "/" + id);
             onoff.add(id);
         }
 
@@ -867,6 +869,72 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
             onoff.add("true");
         }
     }
+
+ //------------------------05/25 23:53 추가---------------------스케줄 누르면 데베에 저장된 값 있는지 검사하고 있으면 불러오겠냐고 물어봄
+
+    //데베에 값이 있는지 검사
+    void get_databese(){
+        Cursor cursor = page3_dbOpenHelper.selectColumns();
+        int size = cursor.getCount();
+
+        if(size > 0){
+            db_message();
+        }
+
+        else{
+            Intent scheduleIntent = new Intent(getApplicationContext(), Page3_Main.class);
+            scheduleIntent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
+            scheduleIntent.addFlags(FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(scheduleIntent);
+        }
+    }
+
+
+    //데베에 값이 있으면 다이얼로그 띄움
+     void db_message() {
+         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogStyle);
+         setTheme(R.style.AlertDialogStyle);
+         builder.setTitle("안내");
+         builder.setMessage("기존에 입력했던 정보가 있습니다. 불러올까요?");
+         builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+             @Override
+             public void onClick(DialogInterface dialog, int which) {
+                 String daypassFromDB = null;
+                 ArrayList<String> course = new ArrayList<>();
+
+                 //데베에서 값을 받아서 뿌려줌
+                 Cursor cursor = page3_dbOpenHelper.selectColumns();
+                 while (cursor.moveToNext()) {
+                     String tempDaypass = cursor.getString(cursor.getColumnIndex("daypass"));
+                     String tempStation = cursor.getString(cursor.getColumnIndex("station"));
+                     daypassFromDB = tempDaypass;
+                     String station_splite[] = tempStation.split(",");
+
+                     for (int p = 1; p < station_splite.length; p++) {
+                         course.add(station_splite[p]);
+                     }
+                 }
+
+                 Intent scheduleIntent = new Intent(getApplicationContext(), Page3_Main.class);
+                 scheduleIntent.putExtra("daypassFromDB", daypassFromDB);
+                 scheduleIntent.putExtra("course", (Serializable) course);
+                 scheduleIntent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
+                 scheduleIntent.addFlags(FLAG_ACTIVITY_NO_ANIMATION);
+                 startActivity(scheduleIntent);
+             }
+         });
+         builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+             @Override
+             public void onClick(DialogInterface dialog, int which) {
+                 page3_dbOpenHelper.deleteAllColumns();
+                 Intent scheduleIntent = new Intent(getApplicationContext(), Page3_Main.class);
+                 scheduleIntent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
+                 scheduleIntent.addFlags(FLAG_ACTIVITY_NO_ANIMATION);
+                 startActivity(scheduleIntent);
+             }
+         });
+         builder.show();
+     }
 
 
 }

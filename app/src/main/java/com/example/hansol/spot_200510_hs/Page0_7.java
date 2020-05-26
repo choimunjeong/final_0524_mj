@@ -8,6 +8,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.airbnb.lottie.LottieAnimationView;
+
 public class Page0_7 extends AppCompatActivity implements View.OnClickListener {
     TextView a1_activity, a2_noAc;
     TextView page7_later, page7_back;
@@ -18,6 +20,11 @@ public class Page0_7 extends AppCompatActivity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_page0_7);
+
+        //애니메이션  -----------------------------------------------------------<----여기 추가
+        LottieAnimationView animationView = findViewById(R.id.page0_7_bg);
+        animationView.setImageAssetsFolder("images/");
+        animationView.playAnimation();
 
         score = new int[8];
 

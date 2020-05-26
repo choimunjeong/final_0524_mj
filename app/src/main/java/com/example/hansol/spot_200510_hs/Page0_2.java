@@ -2,11 +2,15 @@ package com.example.hansol.spot_200510_hs;
 
 import android.content.Intent;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.airbnb.lottie.LottieAnimationView;
 
 public class Page0_2 extends AppCompatActivity implements View.OnClickListener {
 
@@ -21,6 +25,12 @@ public class Page0_2 extends AppCompatActivity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_page0_1);
+
+        //애니메이션  --------------------drawable에 box_round 도 수정함---------------------------------------<----여기 추가
+        LottieAnimationView animationView = findViewById(R.id.page0_1_bg);
+        animationView.setImageAssetsFolder("images/");
+        animationView.playAnimation();
+
 
         a1_alone = (TextView)findViewById(R.id.page0_2_a1);
         a2_family = (TextView)findViewById(R.id.page0_2_a2);
@@ -44,7 +54,11 @@ public class Page0_2 extends AppCompatActivity implements View.OnClickListener {
                 startActivity(intent);
             }
         });
+
+
+
     }
+
 
     // 버튼 선택 시 수행하는 함수
     public void onClick(View view) {

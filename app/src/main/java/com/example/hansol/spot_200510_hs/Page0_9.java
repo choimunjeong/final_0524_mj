@@ -9,6 +9,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.airbnb.lottie.LottieAnimationView;
+
 import Page1.Page1;
 
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;

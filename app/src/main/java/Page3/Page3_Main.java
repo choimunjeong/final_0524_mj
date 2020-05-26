@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
@@ -335,6 +336,25 @@ public class Page3_Main extends AppCompatActivity {
         page3_svg.setWebViewClient(new WebViewClient());
         page3_svg.setHorizontalScrollBarEnabled(false);         //스크롤바 안보이게함
         page3_svg.setVerticalScrollBarEnabled(false);
+
+
+        //------------svg도 수정했음-----------------------<-----------------------------------------------여기추가
+        page3_svg.setWebChromeClient(new WebChromeClient() {
+             public boolean onJsAlert(WebView view, String url, String message, final android.webkit.JsResult result) {
+                 new AlertDialog.Builder(Page3_Main.this)
+                         .setTitle("안내")
+                         .setMessage("해당역은 내일로 정차역이 아닙니다.")
+                         .setPositiveButton(android.R.string.ok,
+                                 new AlertDialog.OnClickListener() {
+                                     public void onClick(
+                                             DialogInterface dialog,
+                                             int which) {
+                                         result.confirm();
+                                     }
+                                 }).setCancelable(false).create().show();
+                 return true;
+             }
+     });
 
         //웹뷰를 로드함
         page3_svg.loadUrl("file:///android_asset/index.html");

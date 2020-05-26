@@ -917,7 +917,7 @@ public class Page1 extends AppCompatActivity implements View.OnClickListener , S
 
                  Intent scheduleIntent = new Intent(getApplicationContext(), Page3_Main.class);
                  scheduleIntent.putExtra("daypassFromDB", daypassFromDB);
-                 scheduleIntent.putExtra("course", (Serializable) course);
+                 scheduleIntent.putExtra("stationFromDB", (Serializable) course);
                  scheduleIntent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
                  scheduleIntent.addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                  startActivity(scheduleIntent);

@@ -135,9 +135,10 @@ public class Page3_Main extends AppCompatActivity {
         daypassFromDB = intent.getStringExtra("daypassFromDB");
         course = (ArrayList<String>)intent.getSerializableExtra("course") ;
         course2 = (ArrayList<String>)intent.getSerializableExtra("course2") ;
+        stationFromDB = (ArrayList<String>)intent.getSerializableExtra("stationFromDB") ;          //<------------여기 추가
 
 
-        //데베 생성----------------------------------------------------------------여기 아래 추가
+        //데베 생성
         page3_dbOpenHelper = new Page3_DbOpenHelper(this);
         page3_dbOpenHelper.open();
         page3_dbOpenHelper.create();
@@ -338,7 +339,7 @@ public class Page3_Main extends AppCompatActivity {
         page3_svg.setVerticalScrollBarEnabled(false);
 
 
-        //------------svg도 수정했음-----------------------<-----------------------------------------------여기추가
+        //정차역 오류 메시지
         page3_svg.setWebChromeClient(new WebChromeClient() {
              public boolean onJsAlert(WebView view, String url, String message, final android.webkit.JsResult result) {
                  new AlertDialog.Builder(Page3_Main.this)
@@ -454,6 +455,33 @@ public class Page3_Main extends AppCompatActivity {
                     mTagContainerLayout1.addTag(course2.get(i));
                     list1.add(course2.get(i));
                     middleOk = true;
+                }
+            }
+        }
+
+        //--------page1 intent 부분 putExtra("startFromDB"  <- 이름 수정------------------------------------------------------------------------도착역까지 추가
+        if (stationFromDB!=null) {
+            for (int i = 0; i < stationFromDB.size(); i++) {
+                if (i == 0) {
+                    mTagContainerLayout1.setTagBackgroundColor(Color.parseColor("#FE9D0D"));
+                    mTagContainerLayout1.setTagBorderColor(Color.parseColor("#FE9D0D"));
+                    mTagContainerLayout1.addTag(stationFromDB.get(i));
+                    list1.add(stationFromDB.get(i));
+                    startOk = true;
+                } else if(i < stationFromDB.size()-1) {
+                    mTagContainerLayout1.setCrossColor(Color.parseColor("#1B503D"));
+                    mTagContainerLayout1.setTagBackgroundColor(Color.parseColor("#4DD9A9"));
+                    mTagContainerLayout1.setTagBorderColor(Color.parseColor("#4DD9A9"));
+                    mTagContainerLayout1.addTag(stationFromDB.get(i));
+                    list1.add(stationFromDB.get(i));
+                    middleOk = true;
+                }  else {
+                    mTagContainerLayout1.setCrossColor(Color.parseColor("#FE800D"));
+                    mTagContainerLayout1.setTagBackgroundColor(Color.parseColor("#FE800D"));
+                    mTagContainerLayout1.setTagBorderColor(Color.parseColor("#FE800D"));
+                    mTagContainerLayout1.addTag(stationFromDB.get(i));
+                    list1.add(stationFromDB.get(i));
+                    endOk = true;
                 }
             }
         }
